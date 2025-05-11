@@ -1,5 +1,5 @@
 [project]
-name = "flood-assistance-system""
+name = "flood-assistance-system"
 version = "0.1.0"
 description = "Assistance system for users in vulnerable situations during flooding events, providing geospatial guidance, safety instructions and meteorological information."
 readme = "README.md"
