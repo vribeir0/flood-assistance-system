@@ -73,8 +73,8 @@ async def run_agent():
                     Condições meteorológicas: Temperatura de 23°C sem previsão de chuva.
 
                     Rota até o local seguro:
-                    1. Siga na direção sudoeste para a Rua Guilherme Pugsley (32 m)
-                    2. Vire à direita na Rua Guilherme Pugsley (0,5 km)
+                    1. Siga na direção sudoeste para a R. Mato Grosso. (32 m)
+                    2. Vire à direita na Tv. Ferreira do Amaral. (500 m)
                     3. Pegue a R. Saint Hilaire (0,6 km)
                     4. Vire à direita na Av. Silva Jardim (0,2 km)
                     5. Continue na Av. Silva Jardim até o destino (1,6 km)
@@ -86,7 +86,7 @@ async def run_agent():
                         "role": "user",
                         "content": """Estou em uma área com risco de alagamento e preciso de informações urgentes.
 
-                    Minha localização atual: Rua Guilherme Pugsley, 1131 - Água Verde, Curitiba, Paraná, Brasil
+                    Minha localização atual: Avenida República Argentina, 1927 - Água Verde, Curitiba - PR
                     
                     Meu destino (local seguro): Av. Sete de Setembro, 3165, Curitiba, Paraná, Brasil
 
