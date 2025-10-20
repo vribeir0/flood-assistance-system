@@ -2,20 +2,21 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Flask Run",
+            "name": "Flask Run (uv)",
             "type": "debugpy",
             "request": "launch",
-            "module": "flask",
+            "program": "${workspaceFolder}/.venv/bin/flask",
+            "args": [
+                "run"
+            ],
             "env": {
                 "FLASK_APP": "app.py",
                 "FLASK_ENV": "development",
                 "FLASK_DEBUG": "1"
             },
-            "args": [
-                "run"
-            ],
+            "console": "integratedTerminal",
             "jinja": true,
             "justMyCode": true
-        }
+        },
     ]
 }
