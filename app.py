@@ -3,6 +3,7 @@ import sys
 from dotenv import load_dotenv
 from flask import Flask
 from flask_restful import Api
+from flask_socketio import SocketIO
 
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
@@ -20,9 +21,15 @@ setup_cors(app)
 env = os.getenv("FLASK_ENV")
 app.config.from_object(config[env])
 
-api = Api(app)
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    async_mode="threading",
+)
 
-init_routes(api)
+api = Api(app)
+init_routes(socketio)
+
 
 if __name__ == "__main__":
-    app.run(debug=app.config["DEBUG"], host="0.0.0.0", port=4000)
+    socketio.run(app, debug=app.config["DEBUG"], host="0.0.0.0", port=4000)

@@ -1,5 +1,5 @@
-from routes.chat import ChatResource
+from routes.chat import initialize_chat_websocket
 
 
-def init_routes(api):
-    api.add_resource(ChatResource, "/api/chat")
+def init_routes(socketio):
+    initialize_chat_websocket(socketio)

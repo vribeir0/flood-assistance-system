@@ -1,19 +1,24 @@
-from flask import Response, request
-from flask_restful import Resource
-
 from usecases.chat import GenerateChatResponse
+import asyncio
 
 
-class ChatResource(Resource):
-    def get(self):
-        message = request.args.get("message", "")
-
+def initialize_chat_websocket(socketio):
+    async def process_message(data):
         usecase = GenerateChatResponse()
 
-        response = Response(
-            usecase(message),
-            mimetype="text/event-stream",
-            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
-        )
+        try:
+            async for chunk in usecase(data):
+                socketio.emit("chat_response", chunk)
 
-        return response
+        except Exception as e:
+            print(e)
+            socketio.emit(
+                "chat_response",
+                {
+                    "data": f'{{"type": "error", "reply": "Falha ao processar mensagem."}}'
+                },
+            )
+
+    @socketio.on("chat_message")
+    def handle_chat_message(data):
+        socketio.start_background_task(lambda: asyncio.run(process_message(data)))
