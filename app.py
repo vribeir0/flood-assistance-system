@@ -32,4 +32,4 @@ init_routes(socketio)
 
 
 if __name__ == "__main__":
-    socketio.run(app, debug=app.config["DEBUG"], host="0.0.0.0", port=4000)
+    socketio.run(app, debug=app.config["DEBUG"], host="0.0.0.0", port=5000)
