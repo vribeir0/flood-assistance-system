@@ -6,7 +6,35 @@ Desenvolvido como Trabalho de Conclusão de Curso na UTFPR.
 
 ## Stack
 
-Python · Flask-SocketIO · LangGraph · Google Gemini · MCP · Google Maps API · Open-Meteo · Nginx · Docker
+**Backend** — Python · Flask-SocketIO · LangGraph · Google Gemini · MCP · Google Maps API · Open-Meteo API  
+**Frontend** — Expo (React Native Web) · TypeScript · Socket.IO client  
+**Infra** — Docker Compose · Nginx · Gunicorn · Cloudflare (HTTPS)
+
+## Estrutura
+
+```
+flood-assistance-system/
+├── backend/          # API Flask + agente LangGraph
+│   ├── src/
+│   │   ├── routes/   # Eventos WebSocket
+│   │   ├── usecases/ # Lógica de negócio e MCP
+│   │   └── prompts/  # System prompts do agente
+│   ├── app.py
+│   ├── server.py     # Servidor MCP 
+│   └── Dockerfile
+├── frontend/         # App Expo Web
+├── nginx/
+│   ├── nginx.conf        # Config de produção
+│   ├── nginx.dev.conf    # Config de desenvolvimento
+│   └── Dockerfile        # Build multi-stage 
+├── docker-compose.yml          # Produção
+└── docker-compose.override.yml # Desenvolvimento 
+```
+
+## Pré-requisitos
+
+- [Docker](https://docs.docker.com/engine/install/) com o plugin Compose
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) (apenas para rodar o backend local sem Docker)
 
 ## Configuração
 
@@ -16,38 +44,38 @@ cd flood-assistance-system
 cp .env.example .env
 ```
 
-Preencha as chaves de API no `.env` (`GEMINI_API_KEY` e `GOOGLE_MAPS_API_KEY` são obrigatórias).
-
-Requer [uv](https://docs.astral.sh/uv/getting-started/installation/) instalado.
-
-## Rodando
-
-**Desenvolvimento (local)**
-```bash
-uv run python app.py
-# http://localhost:5000
-```
-
-**Desenvolvimento (Docker)**
-```bash
-docker compose up --build
-# http://localhost:5000
-```
-
-**Produção (Docker + Nginx + Gunicorn)**
-```bash
-docker compose -f docker-compose.yml up --build -d
-# http://seu-servidor:80
-```
-
-## Variáveis de ambiente
+Preencha as chaves de API no `.env`:
 
 | Variável | Descrição |
 |---|---|
-| `FLASK_ENV` | `development` ou `production` |
-| `GEMINI_API_KEY` | Chave da API do Google Gemini |
-| `GEMINI_MODEL` | Modelo (ex: `gemini-2.5-flash`) |
-| `GOOGLE_MAPS_API_KEY` | Chave da API do Google Maps |
+| `GEMINI_API_KEY` | Chave da API do Google Gemini **(obrigatória)** |
+| `GEMINI_MODEL` | Modelo — ex: `gemini-2.5-flash` |
+| `GOOGLE_MAPS_API_KEY` | Chave da API do Google Maps **(obrigatória)** |
 | `GOOGLE_MAPS_API_URL` | URL da Directions API |
 | `WEATHER_API_URL` | URL da API de clima (Open-Meteo) |
 | `SERVER_PATH` | Caminho para o servidor MCP (padrão: `server.py`) |
+
+## Desenvolvimento
+
+Sobe os três serviços (backend, frontend Expo dev server e Nginx como proxy):
+
+```bash
+docker compose up --build
+```
+
+- **App** → [http://localhost](http://localhost)
+- **Frontend dev server** → [http://localhost:8081](http://localhost:8081) (com hot-reload)
+- **Backend** → [http://localhost:5000](http://localhost:5000) (exposto para debug)
+
+O Docker Compose observa alterações nos arquivos e reinicia os containers automaticamente (`docker compose watch`).
+
+> O `docker-compose.override.yml` é carregado automaticamente em desenvolvimento. Para ignorá-lo, use explicitamente `-f docker-compose.yml`.
+
+## Produção
+
+```bash
+docker compose -f docker-compose.yml up --build -d
+```
+
+Sobe apenas dois serviços: `app` (Gunicorn) e `nginx` (serve o frontend estático e faz proxy do backend). A porta 5000 **não** é exposta externamente.
+
