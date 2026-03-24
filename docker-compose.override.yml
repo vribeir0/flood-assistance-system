@@ -1,0 +1,32 @@
+services:
+  app:
+    environment:
+      FLASK_ENV: development
+    ports:
+      - "5000:5000"
+    command: ["uv", "run", "python", "app.py"]
+    develop:
+      watch:
+        # Hot-reload do container
+        - action: sync+restart
+          path: .
+          target: /app
+          ignore:
+            - .git/
+            - __pycache__/
+            - "**/__pycache__/"
+            - .venv/
+
+        - action: rebuild
+          path: pyproject.toml
+
+  # Nginx permanece ativo em desenvolvimento para proxy do Socket.IO
+  nginx:
+    ports:
+      - "80:80"
+    develop:
+      watch:
+        # Aplica mudanças no nginx.conf e reinicia o nginx sem rebuild
+        - action: sync+restart
+          path: ./nginx/nginx.conf
+          target: /etc/nginx/conf.d/default.conf

@@ -1,0 +1,29 @@
+{
+    "name": "Flood Assistance System",
+    "image": "mcr.microsoft.com/devcontainers/python:3.10",
+    // Instala as dependências do projeto ao criar o container
+    "postCreateCommand": "uv sync",
+    "forwardPorts": [
+        5000
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-python.debugpy",
+                "charliermarsh.ruff",
+                "GitHub.copilot",
+                "GitHub.copilot-chat",
+                "ms-python.black-formatter"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/workspaces/flood-assistance-system/.venv/bin/python",
+                "editor.formatOnSave": true,
+                "[python]": {
+                    "editor.defaultFormatter": "ms-python.black-formatter"
+                }
+            }
+        }
+    }
+}
