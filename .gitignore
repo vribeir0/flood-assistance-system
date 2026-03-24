@@ -6,4 +6,8 @@ __pycache__/
 # Environments
 .venv
 
+# Variáveis de ambiente — nunca commitar o .env real
+.env
+# .env.example deve ser commitado (contém apenas placeholders)
+
 

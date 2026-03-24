@@ -1,24 +1,26 @@
 import os
 import sys
+from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask
-from flask_restful import Api
 from flask_socketio import SocketIO
 
+# Carrega o .env da raiz do projeto explicitamente, antes de qualquer import
+# que possa depender de variáveis de ambiente
+BASE_DIR = Path(__file__).parent
+load_dotenv(BASE_DIR / ".env")
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+sys.path.insert(0, str(BASE_DIR / "src"))
 from middlewares.cors import setup_cors
 from routes import init_routes
 from config import config
 
 
-load_dotenv()
-
 app = Flask(__name__)
 
 setup_cors(app)
 
-env = os.getenv("FLASK_ENV")
+env = os.getenv("FLASK_ENV", "default")
 app.config.from_object(config[env])
 
 socketio = SocketIO(
@@ -27,7 +29,6 @@ socketio = SocketIO(
     async_mode="threading",
 )
 
-api = Api(app)
 init_routes(socketio)
 
 
