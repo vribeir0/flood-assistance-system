@@ -5,7 +5,7 @@
             "name": "Run Flask App",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/app.py",
+            "program": "${workspaceFolder}/backend/app.py",
             "python": "${workspaceFolder}/.venv/bin/python",
             "env": {
                 "FLASK_ENV": "development"
