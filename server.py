@@ -1,22 +1,13 @@
 from mcp.server.fastmcp import FastMCP
 
-from pydantic import BaseModel, Field
 import requests
-from typing import Optional
-
 
 from settings import (
     GOOGLE_MAPS_API_KEY,
     WEATHER_API_URL,
 )
 
-
 mcp = FastMCP("Geo")
-
-
-class LatLon(BaseModel):
-    latitude: str = Field(validation_alias="lat")
-    longitude: str = Field(validation_alias="lon")
 
 
 @mcp.tool()
@@ -48,8 +39,8 @@ async def get_directions_with_steps(
     Args:
         origin_waypoint (dict): Coordenadas do ponto de origem no formato:
             {
-                "latitude": "-25.456119",
-                "longitude": "-49.285514"
+                "latitude": "-25.4284",
+                "longitude": "-49.2733"
             }
         final_waypoint (dict): Coordenadas do ponto de destino no mesmo formato.
 
@@ -80,7 +71,7 @@ async def get_directions_with_steps(
     }
 
     response = requests.get(url, params=params)
-
+    print(response)
     if response.status_code != 200:
         return {
             "error": f"Falha na requisição: {response.status_code}",

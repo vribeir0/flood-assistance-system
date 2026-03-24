@@ -6,7 +6,7 @@ from mcp.client.stdio import stdio_client
 from langgraph.prebuilt import create_react_agent
 from langchain_mcp_adapters.tools import load_mcp_tools
 
-from settings import GEMINI_API_KEY, GEMINI_MODEL, SERVER_PATH
+from settings import GEMINI_API_KEY, GEMINI_MODEL
 from prompts.chat import SYSTEM_PROMPT
 
 server_params = StdioServerParameters(
@@ -35,13 +35,7 @@ class GenerateChatResponse:
                 await session.initialize()
 
                 tools = await load_mcp_tools(session)
-                streaming_model = ChatGoogleGenerativeAI(
-                    google_api_key=GEMINI_API_KEY,
-                    model=GEMINI_MODEL,
-                    temperature=0,
-                )
-
-                agent = create_react_agent(streaming_model, tools)
+                agent = self._build_agent(tools)
                 improved_prompt = {
                     "messages": [
                         {
@@ -61,5 +55,12 @@ class GenerateChatResponse:
                             data = json.dumps({"type": "token", "reply": content})
                             yield data
 
-                data = json.dumps({"type": "done", "reply": ""})
-                yield data
+                yield json.dumps({"type": "done", "reply": ""})
+
+    def _build_agent(self, tools):
+        model = ChatGoogleGenerativeAI(
+            google_api_key=GEMINI_API_KEY,
+            model=GEMINI_MODEL,
+            temperature=0,
+        )
+        return create_react_agent(model, tools)

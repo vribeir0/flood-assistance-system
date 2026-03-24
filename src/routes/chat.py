@@ -1,3 +1,4 @@
+import json
 from usecases.chat import GenerateChatResponse
 import asyncio
 
@@ -14,9 +15,7 @@ def initialize_chat_websocket(socketio):
             print(e)
             socketio.emit(
                 "chat_response",
-                {
-                    "data": f'{{"type": "error", "reply": "Falha ao processar mensagem."}}'
-                },
+                json.dumps({"type": "error", "reply": "Falha ao processar mensagem."}),
             )
 
     @socketio.on("chat_message")
