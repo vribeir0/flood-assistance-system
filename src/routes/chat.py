@@ -1,18 +1,26 @@
 import json
+import logging
+
 from usecases.chat import GenerateChatResponse
-import asyncio
+from usecases.mcp_manager import MCPManager
+
+logger = logging.getLogger(__name__)
 
 
 def initialize_chat_websocket(socketio):
-    async def process_message(data):
+
+    def process_message(data):
+        mcp = MCPManager.get_instance()
         usecase = GenerateChatResponse()
 
-        try:
-            async for chunk in usecase(data):
-                socketio.emit("chat_response", chunk)
+        def emit(chunk):
+            socketio.emit("chat_response", chunk)
 
-        except Exception as e:
-            print(e)
+        try:
+            resultado = mcp.submit(usecase(data, emit=emit))
+            resultado.result()
+        except Exception:
+            logger.exception("Erro no WebSocket de chat")
             socketio.emit(
                 "chat_response",
                 json.dumps({"type": "error", "reply": "Falha ao processar mensagem."}),
@@ -20,4 +28,4 @@ def initialize_chat_websocket(socketio):
 
     @socketio.on("chat_message")
     def handle_chat_message(data):
-        socketio.start_background_task(lambda: asyncio.run(process_message(data)))
+        socketio.start_background_task(process_message, data)

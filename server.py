@@ -1,11 +1,11 @@
-from mcp.server.fastmcp import FastMCP
+import logging
 
 import requests
+from mcp.server.fastmcp import FastMCP
 
-from settings import (
-    GOOGLE_MAPS_API_KEY,
-    WEATHER_API_URL,
-)
+from settings import GOOGLE_MAPS_API_KEY, GOOGLE_MAPS_API_URL, WEATHER_API_URL
+
+logger = logging.getLogger(__name__)
 
 mcp = FastMCP("Geo")
 
@@ -60,7 +60,7 @@ async def get_directions_with_steps(
     origin = f"{origin_waypoint['latitude']},{origin_waypoint['longitude']}"
     destination = f"{final_waypoint['latitude']},{final_waypoint['longitude']}"
 
-    url = "https://maps.googleapis.com/maps/api/directions/json"
+    url = GOOGLE_MAPS_API_URL
 
     params = {
         "origin": origin,
@@ -71,7 +71,7 @@ async def get_directions_with_steps(
     }
 
     response = requests.get(url, params=params)
-    print(response)
+    logger.info("Google Maps API status: %s", response.status_code)
     if response.status_code != 200:
         return {
             "error": f"Falha na requisição: {response.status_code}",
