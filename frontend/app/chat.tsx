@@ -136,17 +136,6 @@ export default function ChatScreen() {
     }
   };
 
-  const locationIcon =
-    locationStatus === "granted"
-      ? "📍"
-      : locationStatus === "loading"
-      ? "⏳"
-      : locationStatus === "denied"
-      ? "🚫"
-      : locationStatus === "error"
-      ? "⚠️"
-      : "📍";
-
   const locationLabel =
     locationStatus === "granted"
       ? "Localização ativa"
@@ -178,9 +167,7 @@ export default function ChatScreen() {
             onPress={fetchLocation}
             disabled={locationStatus === "loading"}
           >
-            <Text style={styles.locationButtonText}>
-              {locationIcon} {locationLabel}
-            </Text>
+            <Text style={styles.locationButtonText}>{locationLabel}</Text>
           </TouchableOpacity>
         </View>
 
@@ -196,7 +183,7 @@ export default function ChatScreen() {
           {messages.length === 0 && !isStreaming && (
             <Text style={styles.emptyText}>
               {locationStatus === "idle" || locationStatus === "denied"
-                ? "💡 Compartilhe sua localização para obter rotas de evacuação precisas."
+                ? "Compartilhe sua localização para obter informações mais precisas."
                 : "Envie uma mensagem para começar."}
             </Text>
           )}
