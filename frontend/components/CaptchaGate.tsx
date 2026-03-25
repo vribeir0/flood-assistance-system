@@ -15,24 +15,11 @@ export default function CaptchaGate({
   const [verified, setVerified] = useState(false);
   const [ready, setReady] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [verifyError, setVerifyError] = useState(false);
   const containerRef = useRef<View>(null);
 
-  useEffect(() => {
-    setMounted(true);
-
-    // Só reutiliza a sessão se ainda existir um token válido
-    if (
-      sessionStorage.getItem(SESSION_KEY) === "true" &&
-      sessionStorage.getItem(SESSION_TOKEN_KEY)
-    ) {
-      setVerified(true);
-      return;
-    }
-
-    // Garante estado limpo caso o token tenha expirado
-    sessionStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(SESSION_TOKEN_KEY);
-    setReady(true);
+  const startCaptcha = () => {
+    setVerifyError(false);
 
     (window as any).__onTurnstileLoad = () => {
       const el = document.getElementById("turnstile-container");
@@ -52,7 +39,8 @@ export default function CaptchaGate({
               sessionStorage.setItem(SESSION_KEY, "true");
               setVerified(true);
             } catch {
-              // Re-renderiza o widget para nova tentativa
+              // Exibe erro ao usuário em vez de resetar silenciosamente em loop
+              setVerifyError(true);
               (window as any).turnstile?.reset();
             }
           },
@@ -71,14 +59,28 @@ export default function CaptchaGate({
       script.defer = true;
       document.head.appendChild(script);
     } else {
-      // Script já carregado — renderiza imediatamente
       (window as any).__onTurnstileLoad?.();
     }
+  };
+
+  useEffect(() => {
+    setMounted(true);
+
+    if (
+      sessionStorage.getItem(SESSION_KEY) === "true" &&
+      sessionStorage.getItem(SESSION_TOKEN_KEY)
+    ) {
+      setVerified(true);
+      return;
+    }
+
+    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_TOKEN_KEY);
+    setReady(true);
+    startCaptcha();
   }, []);
 
-  // Antes de montar no cliente, não renderiza nada
   if (!mounted) return null;
-
   if (verified) return <>{children}</>;
 
   if (!ready) {
@@ -96,7 +98,11 @@ export default function CaptchaGate({
         <Text style={styles.subtitle}>
           Complete o desafio abaixo para acessar o sistema
         </Text>
-        {/* nativeID mapeia para id no DOM em Expo Web */}
+        {verifyError && (
+          <Text style={styles.errorText}>
+            Falha ao verificar. Tente novamente.
+          </Text>
+        )}
         <View
           ref={containerRef}
           nativeID="turnstile-container"
@@ -140,5 +146,11 @@ const styles = StyleSheet.create({
   widget: {
     minHeight: 65,
     minWidth: 300,
+  },
+  errorText: {
+    fontSize: 13,
+    color: "#d32f2f",
+    textAlign: "center",
+    marginBottom: 12,
   },
 });
