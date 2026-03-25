@@ -1,6 +1,11 @@
 import { Text, View } from "@/components/Themed";
 import { useRouter } from "expo-router";
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -81,6 +86,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
+    ...(Platform.OS === "web"
+      ? {
+          height: "100vh" as any,
+          maxHeight: "100vh" as any,
+          overflow: "hidden" as any,
+        }
+      : {}),
   },
   content: {
     flexGrow: 1,

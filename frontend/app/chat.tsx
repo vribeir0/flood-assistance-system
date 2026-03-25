@@ -7,7 +7,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Dimensions,
 } from "react-native";
 import Markdown from "react-native-markdown-display";
 
@@ -27,6 +26,7 @@ export default function ChatScreen() {
   const [locationStatus, setLocationStatus] = useState<
     "idle" | "loading" | "granted" | "denied" | "error"
   >("idle");
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   const fetchLocation = () => {
     if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
@@ -34,9 +34,6 @@ export default function ChatScreen() {
       return;
     }
 
-    // getCurrentPosition deve ser a primeira chamada dentro do handler de
-    // toque. No Safari, qualquer setState antes da chamada privilegiada pode
-    // invalidar a user gesture e negar a permissão sem exibir o prompt.
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setLocation({
@@ -67,6 +64,14 @@ export default function ChatScreen() {
 
     socket.on("connect_error", (error) => {
       console.error("Erro de conexão:", error);
+    });
+
+    socket.on("reconnect_failed", () => {
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.removeItem("captcha_verified");
+        sessionStorage.removeItem("captcha_session_token");
+      }
+      setSessionExpired(true);
     });
 
     socket.on("chat_response", (data) => {
@@ -174,6 +179,23 @@ export default function ChatScreen() {
             <Text style={styles.locationButtonText}>{locationLabel}</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Banner de sessão expirada */}
+        {sessionExpired && (
+          <View style={styles.sessionExpiredBanner}>
+            <Text style={styles.sessionExpiredText}>
+              Sessão expirada. Recarregue a página para continuar.
+            </Text>
+            <TouchableOpacity
+              style={styles.reloadButton}
+              onPress={() => {
+                if (typeof window !== "undefined") window.location.reload();
+              }}
+            >
+              <Text style={styles.reloadButtonText}>Recarregar</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Mensagens — ocupa todo o espaço restante */}
         <ScrollView
@@ -409,5 +431,32 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     fontSize: 15,
+  },
+  sessionExpiredBanner: {
+    backgroundColor: "#FFF3E0",
+    borderBottomWidth: 1,
+    borderBottomColor: "#FFCC80",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  sessionExpiredText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#E65100",
+  },
+  reloadButton: {
+    backgroundColor: "#E65100",
+    borderRadius: 12,
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+  },
+  reloadButtonText: {
+    color: "white",
+    fontSize: 13,
+    fontWeight: "bold",
   },
 });
