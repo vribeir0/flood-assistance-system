@@ -10,6 +10,10 @@ COPY frontend .
 # EXPO_PUBLIC_API_URL vazio = usa a mesma origem (window.location)
 ARG EXPO_PUBLIC_API_URL=""
 ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL
+
+ARG EXPO_PUBLIC_TURNSTILE_SITE_KEY=""
+ENV EXPO_PUBLIC_TURNSTILE_SITE_KEY=$EXPO_PUBLIC_TURNSTILE_SITE_KEY
+
 ENV EXPO_PUBLIC_ENV=production
 
 RUN npx expo export --platform web --output-dir /dist
