@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, request
 from flask_socketio import SocketIO
 
 # Carrega o .env antes de qualquer import que dependa de variáveis de ambiente
@@ -14,7 +14,7 @@ load_dotenv(BASE_DIR / ".env", override=True)
 sys.path.insert(0, str(BASE_DIR / "src"))
 
 from routes.chat import initialize_chat_websocket
-from settings import DEBUG
+from settings import ALLOWED_ORIGINS, DEBUG
 from usecases.mcp_manager import MCPManager
 
 logging.basicConfig(
@@ -28,15 +28,18 @@ app.config["DEBUG"] = DEBUG
 
 @app.after_request
 def add_cors_headers(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    origin = request.headers.get("Origin")
+    if origin in ALLOWED_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        response.headers["Vary"] = "Origin"
     return response
 
 
 socketio = SocketIO(
     app,
-    cors_allowed_origins="*",
+    cors_allowed_origins=ALLOWED_ORIGINS,
     async_mode="threading",
 )
 
@@ -50,4 +53,6 @@ if not DEBUG or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
 
 
 if __name__ == "__main__":
-    socketio.run(app, debug=DEBUG, host="0.0.0.0", port=5000, allow_unsafe_werkzeug=True)
+    socketio.run(
+        app, debug=DEBUG, host="0.0.0.0", port=5000, allow_unsafe_werkzeug=True
+    )

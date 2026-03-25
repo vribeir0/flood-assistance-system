@@ -19,3 +19,8 @@ WEATHER_API_URL = os.getenv("WEATHER_API_URL")
 
 # MCP Server
 SERVER_PATH = os.path.join(BASE_DIR, os.getenv("SERVER_PATH", "server.py"))
+
+# CORS — origens permitidas (separadas por vírgula no .env)
+# Exemplo: https://eventoshidrometereologicos.com.br,http://localhost
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost")
+ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
