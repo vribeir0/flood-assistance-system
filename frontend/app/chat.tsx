@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import Markdown from "react-native-markdown-display";
 
-import { getCurrentLocation, LocationCoords } from "@/helpers/location";
+import { LocationCoords } from "@/helpers/location";
 import { chatService } from "@/services/chatService";
 import { Message } from "@/types/chat";
 import { Socket } from "socket.io-client";
@@ -28,16 +28,33 @@ export default function ChatScreen() {
   >("idle");
 
   const fetchLocation = () => {
+    if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
+      setLocationStatus("error");
+      return;
+    }
+
     setLocationStatus("loading");
-    getCurrentLocation()
-      .then((coords) => {
-        setLocation(coords);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
         setLocationStatus("granted");
-      })
-      .catch((error) => {
-        const msg: string = error.message ?? "Erro desconhecido";
-        setLocationStatus(msg.includes("negada") ? "denied" : "error");
-      });
+      },
+      (error) => {
+        setLocationStatus(
+          error.code === error.PERMISSION_DENIED ? "denied" : "error"
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        // maximumAge: 0 garante que nenhum resultado negado em cache
+        maximumAge: 0,
+      }
+    );
   };
 
   useEffect(() => {
