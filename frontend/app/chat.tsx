@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import Markdown from "react-native-markdown-display";
 
@@ -33,8 +34,9 @@ export default function ChatScreen() {
       return;
     }
 
-    setLocationStatus("loading");
-
+    // getCurrentPosition deve ser a primeira chamada dentro do handler de
+    // toque. No Safari, qualquer setState antes da chamada privilegiada pode
+    // invalidar a user gesture e negar a permissão sem exibir o prompt.
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setLocation({
@@ -51,10 +53,12 @@ export default function ChatScreen() {
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        // maximumAge: 0 garante que nenhum resultado negado em cache
         maximumAge: 0,
       }
     );
+
+    // Atualiza o estado visual após disparar a requisição
+    setLocationStatus("loading");
   };
 
   useEffect(() => {
@@ -269,6 +273,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f0f2f5",
+    // No web, garante que o container nunca ultrapasse a altura da viewport
+    ...(Platform.OS === "web"
+      ? {
+          height: "100vh" as any,
+          maxHeight: "100vh" as any,
+          overflow: "hidden" as any,
+        }
+      : {}),
   },
   chatWrapper: {
     flex: 1,

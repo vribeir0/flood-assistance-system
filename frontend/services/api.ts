@@ -12,7 +12,7 @@ export const api = axios.create({
 
 export const createSocket = (sessionToken?: string): Socket => {
   const socket = io(API_URL, {
-    transports: ["websocket"],
+    transports: ["polling", "websocket"],
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionAttempts: 5,
