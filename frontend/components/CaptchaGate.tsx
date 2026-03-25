@@ -22,19 +22,15 @@ export default function CaptchaGate({
 
     setReady(true);
 
-    // Callback global chamado pelo Turnstile ao concluir o desafio
-    (window as any).__turnstileSuccess = () => {
-      sessionStorage.setItem(SESSION_KEY, "true");
-      setVerified(true);
-    };
-
-    // Callback global chamado quando o script do Turnstile termina de carregar
     (window as any).__onTurnstileLoad = () => {
       const el = document.getElementById("turnstile-container");
       if (el && (window as any).turnstile) {
         (window as any).turnstile.render(el, {
           sitekey: SITE_KEY,
-          callback: "__turnstileSuccess",
+          callback: (_token: string) => {
+            sessionStorage.setItem(SESSION_KEY, "true");
+            setVerified(true);
+          },
           theme: "light",
           language: "pt-BR",
         });
