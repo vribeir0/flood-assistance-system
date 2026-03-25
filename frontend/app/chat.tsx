@@ -21,16 +21,27 @@ export default function ChatScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const socketRef = useRef<Socket | null>(null);
   const [location, setLocation] = useState<LocationCoords | null>(null);
+  const [locationStatus, setLocationStatus] = useState<
+    "loading" | "granted" | "denied" | "error"
+  >("loading");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchLocation = () => {
+    setLocationStatus("loading");
     getCurrentLocation()
       .then((coords) => {
         setLocation(coords);
+        setLocationStatus("granted");
       })
       .catch((error) => {
-        setErrorMsg("Erro ao obter localização: " + error.message);
+        const msg: string = error.message ?? "Erro desconhecido";
+        setErrorMsg(msg);
+        setLocationStatus(msg.includes("negada") ? "denied" : "error");
       });
+  };
+
+  useEffect(() => {
+    fetchLocation();
   }, []);
 
   useEffect(() => {
@@ -129,6 +140,35 @@ export default function ChatScreen() {
     <View style={styles.container}>
       <View style={styles.chatWrapper}>
         <Text style={styles.title}>ChatT</Text>
+
+        {/* Banner de status de localização */}
+        {locationStatus === "loading" && (
+          <View style={[styles.locationBanner, styles.locationLoading]}>
+            <Text style={styles.locationBannerText}>
+              📍 Obtendo localização...
+            </Text>
+          </View>
+        )}
+        {locationStatus === "denied" && (
+          <View style={[styles.locationBanner, styles.locationError]}>
+            <Text style={styles.locationBannerText}>
+              ⚠️ Permissão de localização negada. Ative nas configurações do
+              navegador.
+            </Text>
+          </View>
+        )}
+        {locationStatus === "error" && (
+          <View style={[styles.locationBanner, styles.locationError]}>
+            <Text style={styles.locationBannerText}>⚠️ {errorMsg}</Text>
+            <TouchableOpacity
+              onPress={fetchLocation}
+              style={styles.retryButton}
+            >
+              <Text style={styles.retryButtonText}>Tentar novamente</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <ScrollView
           ref={scrollViewRef}
           style={styles.messagesContainer}
@@ -289,6 +329,39 @@ const styles = StyleSheet.create({
   },
   sendButtonText: {
     color: "white",
+    fontWeight: "bold",
+  },
+  locationBanner: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginHorizontal: 10,
+    marginBottom: 8,
+    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  locationLoading: {
+    backgroundColor: "#E3F2FD",
+  },
+  locationError: {
+    backgroundColor: "#FFF3E0",
+  },
+  locationBannerText: {
+    fontSize: 13,
+    color: "#555",
+    flex: 1,
+  },
+  retryButton: {
+    backgroundColor: "#FF9800",
+    borderRadius: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+  },
+  retryButtonText: {
+    color: "white",
+    fontSize: 12,
     fontWeight: "bold",
   },
 });
