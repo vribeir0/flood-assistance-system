@@ -12,9 +12,12 @@ export default function CaptchaGate({
 }) {
   const [verified, setVerified] = useState(false);
   const [ready, setReady] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<View>(null);
 
   useEffect(() => {
+    setMounted(true);
+
     if (sessionStorage.getItem(SESSION_KEY) === "true") {
       setVerified(true);
       return;
@@ -32,7 +35,7 @@ export default function CaptchaGate({
             setVerified(true);
           },
           theme: "light",
-          language: "pt-BR",
+          language: "pt-br",
         });
       }
     };
@@ -50,6 +53,9 @@ export default function CaptchaGate({
       (window as any).__onTurnstileLoad?.();
     }
   }, []);
+
+  // Antes de montar no cliente, não renderiza nada
+  if (!mounted) return null;
 
   if (verified) return <>{children}</>;
 
