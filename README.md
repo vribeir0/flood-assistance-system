@@ -67,9 +67,6 @@ docker compose up --build
 - **Frontend dev server** → [http://localhost:8081](http://localhost:8081) (com hot-reload)
 - **Backend** → [http://localhost:5000](http://localhost:5000) (exposto para debug)
 
-O Docker Compose observa alterações nos arquivos e reinicia os containers automaticamente (`docker compose watch`).
-
-> O `docker-compose.override.yml` é carregado automaticamente em desenvolvimento. Para ignorá-lo, use explicitamente `-f docker-compose.yml`.
 
 ## Produção
 
@@ -77,5 +74,7 @@ O Docker Compose observa alterações nos arquivos e reinicia os containers auto
 docker compose -f docker-compose.yml up --build -d
 ```
 
-Sobe apenas dois serviços: `app` (Gunicorn) e `nginx` (serve o frontend estático e faz proxy do backend). A porta 5000 **não** é exposta externamente.
+Sobe apenas dois serviços: `app` (Gunicorn) e `nginx` (serve o frontend estático e faz proxy do backend).
+
+> **Importante:** use `-f docker-compose.yml` para ignorar o `docker-compose.override.yml` (desenvolvimento). Sem essa flag, serão 3 serviços incluindo o Expo dev server.
 

@@ -6,9 +6,9 @@ __pycache__/
 # Environments
 .venv
 
-# Variáveis de ambiente — nunca commitar o .env real
+
 .env
-# .env.example deve ser commitado (contém apenas placeholders)
+# .env.example deve ser commitado
 
 # Frontend — dependências e artefatos de build
 frontend/node_modules/
@@ -16,4 +16,8 @@ frontend/.expo/
 frontend/dist/
 frontend/.env
 frontend/expo-env.d.ts
+
+# Certificados SSL 
+nginx/cert.pem
+nginx/key.pem
 

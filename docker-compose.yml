@@ -15,6 +15,10 @@ services:
       dockerfile: nginx/Dockerfile
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/cert.pem:/etc/ssl/cloudflare/cert.pem:ro
+      - ./nginx/key.pem:/etc/ssl/cloudflare/key.pem:ro
     depends_on:
       - app
     restart: unless-stopped
