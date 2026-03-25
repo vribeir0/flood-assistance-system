@@ -13,7 +13,7 @@ load_dotenv(BASE_DIR / ".env", override=True)
 
 sys.path.insert(0, str(BASE_DIR / "src"))
 
-from routes.chat import initialize_chat_websocket
+from routes.chat import initialize_chat_routes, initialize_chat_websocket
 from settings import ALLOWED_ORIGINS, DEBUG
 from usecases.mcp_manager import MCPManager
 
@@ -44,6 +44,7 @@ socketio = SocketIO(
 )
 
 initialize_chat_websocket(socketio)
+initialize_chat_routes(app)
 
 # Conexão MCP persistente
 # Em modo debug o Flask cria um processo filho (reloader); só inicia o MCP lá.

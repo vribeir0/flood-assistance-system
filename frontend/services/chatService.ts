@@ -2,6 +2,8 @@ import { ChatResponse } from "@/types/chat";
 import { Socket } from "socket.io-client";
 import { api, createSocket } from "./api";
 
+const SESSION_TOKEN_KEY = "captcha_session_token";
+
 export const chatService = {
   sendMessage: async (message: string): Promise<ChatResponse> => {
     try {
@@ -15,6 +17,10 @@ export const chatService = {
   },
 
   createWebSocket: (): Socket => {
-    return createSocket();
+    const token =
+      typeof sessionStorage !== "undefined"
+        ? sessionStorage.getItem(SESSION_TOKEN_KEY) ?? undefined
+        : undefined;
+    return createSocket(token);
   },
 };

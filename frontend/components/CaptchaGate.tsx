@@ -1,9 +1,11 @@
 import { Text, View } from "@/components/Themed";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Platform, StyleSheet } from "react-native";
+import { API_URL } from "@/services/api";
 
 const SITE_KEY = process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 const SESSION_KEY = "captcha_verified";
+const SESSION_TOKEN_KEY = "captcha_session_token";
 
 export default function CaptchaGate({
   children,
@@ -18,11 +20,18 @@ export default function CaptchaGate({
   useEffect(() => {
     setMounted(true);
 
-    if (sessionStorage.getItem(SESSION_KEY) === "true") {
+    // Só reutiliza a sessão se ainda existir um token válido
+    if (
+      sessionStorage.getItem(SESSION_KEY) === "true" &&
+      sessionStorage.getItem(SESSION_TOKEN_KEY)
+    ) {
       setVerified(true);
       return;
     }
 
+    // Garante estado limpo caso o token tenha expirado
+    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_TOKEN_KEY);
     setReady(true);
 
     (window as any).__onTurnstileLoad = () => {
@@ -30,9 +39,22 @@ export default function CaptchaGate({
       if (el && (window as any).turnstile) {
         (window as any).turnstile.render(el, {
           sitekey: SITE_KEY,
-          callback: (_token: string) => {
-            sessionStorage.setItem(SESSION_KEY, "true");
-            setVerified(true);
+          callback: async (cfToken: string) => {
+            try {
+              const res = await fetch(`${API_URL}/verify-captcha`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: cfToken }),
+              });
+              if (!res.ok) throw new Error("Verificação falhou");
+              const { session_token } = await res.json();
+              sessionStorage.setItem(SESSION_TOKEN_KEY, session_token);
+              sessionStorage.setItem(SESSION_KEY, "true");
+              setVerified(true);
+            } catch {
+              // Re-renderiza o widget para nova tentativa
+              (window as any).turnstile?.reset();
+            }
           },
           theme: "light",
           language: "pt-br",
