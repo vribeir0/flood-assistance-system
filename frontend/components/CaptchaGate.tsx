@@ -77,8 +77,14 @@ export default function CaptchaGate({
     sessionStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(SESSION_TOKEN_KEY);
     setReady(true);
-    startCaptcha();
   }, []);
+
+  // Só inicia o Turnstile após o container estar no DOM.
+  useEffect(() => {
+    if (ready && !verified) {
+      startCaptcha();
+    }
+  }, [ready]);
 
   if (!mounted) return null;
   if (verified) return <>{children}</>;
