@@ -19,6 +19,7 @@ export default function ChatScreen() {
   const [locationStatus, setLocationStatus] = useState<
     "idle" | "loading" | "granted" | "denied" | "error"
   >("idle");
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
 
   const fetchLocation = () => {
@@ -34,6 +35,7 @@ export default function ChatScreen() {
           longitude: position.coords.longitude,
         });
         setLocationStatus("granted");
+        setShowLocationModal(false);
       },
       (error) => {
         setLocationStatus(
@@ -127,24 +129,27 @@ export default function ChatScreen() {
   }, [messages, streamResponse]);
 
   const handleSendMessage = async () => {
-    if (message.trim() && socketRef.current) {
-      const userMessage: Message = {
-        text: message,
-        source: "user",
-        timestamp: Date.now(),
-      };
-      setMessages((prev) => [...prev, userMessage]);
+    if (!message.trim() || !socketRef.current) return;
 
-      const messageData: any = { message };
-      if (location) {
-        messageData.latitude = location.latitude;
-        messageData.longitude = location.longitude;
-      }
-
-      socketRef.current.emit("chat_message", messageData);
-      setMessage("");
-      setIsStreaming(true);
+    if (locationStatus !== "granted") {
+      setShowLocationModal(true);
+      return;
     }
+
+    const userMessage: Message = {
+      text: message,
+      source: "user",
+      timestamp: Date.now(),
+    };
+    setMessages((prev) => [...prev, userMessage]);
+
+    const messageData: any = { message };
+    messageData.latitude = location!.latitude;
+    messageData.longitude = location!.longitude;
+
+    socketRef.current.emit("chat_message", messageData);
+    setMessage("");
+    setIsStreaming(true);
   };
 
   const locationLabel =
@@ -232,8 +237,7 @@ export default function ChatScreen() {
           </View>
         )}
 
-        {/* Overlay de bloqueio — exibido enquanto localização não for concedida */}
-        {locationStatus !== "granted" && locationStatus !== "loading" && (
+        {showLocationModal && (
           <View style={styles.locationOverlay}>
             <View style={styles.locationOverlayCard}>
               <Text style={styles.locationOverlayTitle}>
@@ -241,31 +245,35 @@ export default function ChatScreen() {
               </Text>
               <Text style={styles.locationOverlayText}>
                 {locationStatus === "denied"
-                  ? "Você negou o acesso à localização. Para usar o chat, libere a permissão nas configurações do navegador e tente novamente."
+                  ? "Você negou o acesso à localização. Para respostas precisas, libere a permissão nas configurações do navegador e tente novamente."
                   : locationStatus === "error"
                   ? "Não foi possível obter sua localização. Verifique se o GPS está ativo e tente novamente."
-                  : "Este sistema precisa da sua localização para calcular rotas de evacuação e verificar condições meteorológicas na sua área."}
+                  : "Para fornecer rotas de evacuação e condições meteorológicas da sua área, este sistema precisa da sua localização."}
               </Text>
               <button
                 onClick={fetchLocation}
+                disabled={locationStatus === "loading"}
                 style={{
-                  cursor: "pointer",
-                  backgroundColor: "#1976D2",
+                  cursor: locationStatus === "loading" ? "default" : "pointer",
+                  backgroundColor:
+                    locationStatus === "loading" ? "#90CAF9" : "#1976D2",
                   border: "none",
                   borderRadius: 24,
                   paddingTop: 12,
                   paddingBottom: 12,
                   paddingLeft: 32,
                   paddingRight: 32,
-                  marginTop: 4,
                   color: "white",
                   fontWeight: "bold",
                   fontSize: 15,
                   fontFamily: "inherit",
                   lineHeight: "inherit",
+                  width: "100%",
                 }}
               >
-                {locationStatus === "denied"
+                {locationStatus === "loading"
+                  ? "Obtendo..."
+                  : locationStatus === "denied" || locationStatus === "error"
                   ? "Tentar novamente"
                   : "Permitir localização"}
               </button>
@@ -284,9 +292,7 @@ export default function ChatScreen() {
         >
           {messages.length === 0 && !isStreaming && (
             <Text style={styles.emptyText}>
-              {locationStatus === "idle" || locationStatus === "denied"
-                ? "Compartilhe sua localização para obter informações mais precisas."
-                : "Envie uma mensagem para começar."}
+              Envie uma mensagem para começar.
             </Text>
           )}
           {messages.map((msg, idx) => (
