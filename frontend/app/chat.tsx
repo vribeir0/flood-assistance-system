@@ -101,6 +101,15 @@ export default function ChatScreen() {
             }
             return "";
           });
+        } else if (response.type === "error") {
+          setIsStreaming(false);
+          setStreamResponse("");
+          const errorMessage: Message = {
+            text: response.reply || "Erro desconhecido.",
+            source: "system",
+            timestamp: Date.now(),
+          };
+          setMessages((prev) => [...prev, errorMessage]);
         }
       } catch (e) {
         console.error("Erro ao processar resposta:", e);
