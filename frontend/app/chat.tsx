@@ -1,13 +1,6 @@
 import { Text, View } from "@/components/Themed";
 import { useEffect, useRef, useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
+import { ScrollView, StyleSheet, TextInput } from "react-native";
 import Markdown from "react-native-markdown-display";
 
 import { LocationCoords } from "@/helpers/location";
@@ -166,65 +159,48 @@ export default function ChatScreen() {
       : "Compartilhar localização";
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <View style={styles.container}>
       <View style={styles.chatWrapper}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Chat</Text>
-          {Platform.OS === "web" ? (
-            <button
-              onClick={fetchLocation}
-              disabled={locationStatus === "loading"}
-              style={{
-                cursor: locationStatus === "loading" ? "default" : "pointer",
-                border: `1px solid ${
-                  locationStatus === "granted"
-                    ? "#A5D6A7"
-                    : locationStatus === "loading"
-                    ? "#FFF176"
-                    : locationStatus === "denied" || locationStatus === "error"
-                    ? "#FFCC80"
-                    : "#90CAF9"
-                }`,
-                backgroundColor:
-                  locationStatus === "granted"
-                    ? "#E8F5E9"
-                    : locationStatus === "loading"
-                    ? "#FFF9C4"
-                    : locationStatus === "denied" || locationStatus === "error"
-                    ? "#FFF3E0"
-                    : "#E3F2FD",
-                borderRadius: 20,
-                paddingTop: 6,
-                paddingBottom: 6,
-                paddingLeft: 12,
-                paddingRight: 12,
-                fontSize: 13,
-                color: "#444",
-                fontWeight: "500",
-                fontFamily: "inherit",
-              }}
-            >
-              {locationLabel}
-            </button>
-          ) : (
-            <TouchableOpacity
-              style={[
-                styles.locationButton,
-                locationStatus === "granted" && styles.locationButtonActive,
-                locationStatus === "loading" && styles.locationButtonLoading,
-                (locationStatus === "denied" || locationStatus === "error") &&
-                  styles.locationButtonError,
-              ]}
-              onPress={fetchLocation}
-              disabled={locationStatus === "loading"}
-            >
-              <Text style={styles.locationButtonText}>{locationLabel}</Text>
-            </TouchableOpacity>
-          )}
+          <button
+            onClick={fetchLocation}
+            disabled={locationStatus === "loading"}
+            style={{
+              cursor: locationStatus === "loading" ? "default" : "pointer",
+              border: `1px solid ${
+                locationStatus === "granted"
+                  ? "#A5D6A7"
+                  : locationStatus === "loading"
+                  ? "#FFF176"
+                  : locationStatus === "denied" || locationStatus === "error"
+                  ? "#FFCC80"
+                  : "#90CAF9"
+              }`,
+              backgroundColor:
+                locationStatus === "granted"
+                  ? "#E8F5E9"
+                  : locationStatus === "loading"
+                  ? "#FFF9C4"
+                  : locationStatus === "denied" || locationStatus === "error"
+                  ? "#FFF3E0"
+                  : "#E3F2FD",
+              borderRadius: 20,
+              paddingTop: 6,
+              paddingBottom: 6,
+              paddingLeft: 12,
+              paddingRight: 12,
+              fontSize: 13,
+              color: "#444",
+              fontWeight: "500",
+
+              fontFamily: "inherit",
+              lineHeight: "inherit",
+            }}
+          >
+            {locationLabel}
+          </button>
         </View>
 
         {/* Banner de sessão expirada */}
@@ -233,14 +209,26 @@ export default function ChatScreen() {
             <Text style={styles.sessionExpiredText}>
               Sessão expirada. Recarregue a página para continuar.
             </Text>
-            <TouchableOpacity
-              style={styles.reloadButton}
-              onPress={() => {
-                if (typeof window !== "undefined") window.location.reload();
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                backgroundColor: "#E65100",
+                border: "none",
+                borderRadius: 12,
+                paddingTop: 5,
+                paddingBottom: 5,
+                paddingLeft: 12,
+                paddingRight: 12,
+                color: "white",
+                fontSize: 13,
+                fontWeight: "bold",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                lineHeight: "inherit",
               }}
             >
-              <Text style={styles.reloadButtonText}>Recarregar</Text>
-            </TouchableOpacity>
+              Recarregar
+            </button>
           </View>
         )}
 
@@ -258,41 +246,29 @@ export default function ChatScreen() {
                   ? "Não foi possível obter sua localização. Verifique se o GPS está ativo e tente novamente."
                   : "Este sistema precisa da sua localização para calcular rotas de evacuação e verificar condições meteorológicas na sua área."}
               </Text>
-              {Platform.OS === "web" ? (
-                <button
-                  onClick={fetchLocation}
-                  style={{
-                    cursor: "pointer",
-                    backgroundColor: "#1976D2",
-                    border: "none",
-                    borderRadius: 24,
-                    paddingTop: 12,
-                    paddingBottom: 12,
-                    paddingLeft: 32,
-                    paddingRight: 32,
-                    marginTop: 4,
-                    color: "white",
-                    fontWeight: "bold",
-                    fontSize: 15,
-                    fontFamily: "inherit",
-                  }}
-                >
-                  {locationStatus === "denied"
-                    ? "Tentar novamente"
-                    : "Permitir localização"}
-                </button>
-              ) : (
-                <TouchableOpacity
-                  style={styles.locationOverlayButton}
-                  onPress={fetchLocation}
-                >
-                  <Text style={styles.locationOverlayButtonText}>
-                    {locationStatus === "denied"
-                      ? "Tentar novamente"
-                      : "Permitir localização"}
-                  </Text>
-                </TouchableOpacity>
-              )}
+              <button
+                onClick={fetchLocation}
+                style={{
+                  cursor: "pointer",
+                  backgroundColor: "#1976D2",
+                  border: "none",
+                  borderRadius: 24,
+                  paddingTop: 12,
+                  paddingBottom: 12,
+                  paddingLeft: 32,
+                  paddingRight: 32,
+                  marginTop: 4,
+                  color: "white",
+                  fontWeight: "bold",
+                  fontSize: 15,
+                  fontFamily: "inherit",
+                  lineHeight: "inherit",
+                }}
+              >
+                {locationStatus === "denied"
+                  ? "Tentar novamente"
+                  : "Permitir localização"}
+              </button>
             </View>
           </View>
         )}
@@ -356,19 +332,30 @@ export default function ChatScreen() {
             placeholderTextColor="gray"
             multiline={false}
           />
-          <TouchableOpacity
-            style={[
-              styles.sendButton,
-              isStreaming && styles.sendButtonDisabled,
-            ]}
-            onPress={handleSendMessage}
+          <button
+            onClick={handleSendMessage}
             disabled={isStreaming}
+            style={{
+              backgroundColor: isStreaming ? "#90CAF9" : "#1976D2",
+              border: "none",
+              borderRadius: 24,
+              paddingTop: 11,
+              paddingBottom: 11,
+              paddingLeft: 20,
+              paddingRight: 20,
+              color: "white",
+              fontWeight: "bold",
+              fontSize: 15,
+              cursor: isStreaming ? "default" : "pointer",
+              fontFamily: "inherit",
+              lineHeight: "inherit",
+            }}
           >
-            <Text style={styles.sendButtonText}>Enviar</Text>
-          </TouchableOpacity>
+            Enviar
+          </button>
         </View>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -395,14 +382,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f0f2f5",
-    // No web, garante que o container nunca ultrapasse a altura da viewport
-    ...(Platform.OS === "web"
-      ? {
-          height: "100vh" as any,
-          maxHeight: "100vh" as any,
-          overflow: "hidden" as any,
-        }
-      : {}),
+    height: "100vh" as any,
+    maxHeight: "100vh" as any,
+    overflow: "hidden" as any,
   },
   chatWrapper: {
     flex: 1,
@@ -429,33 +411,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1976D2",
   },
-  locationButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#E3F2FD",
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: "#90CAF9",
-  },
-  locationButtonActive: {
-    backgroundColor: "#E8F5E9",
-    borderColor: "#A5D6A7",
-  },
-  locationButtonLoading: {
-    backgroundColor: "#FFF9C4",
-    borderColor: "#FFF176",
-  },
-  locationButtonError: {
-    backgroundColor: "#FFF3E0",
-    borderColor: "#FFCC80",
-  },
-  locationButtonText: {
-    fontSize: 13,
-    color: "#444",
-    fontWeight: "500",
-  },
+
   messagesContainer: {
     flex: 1,
   },
@@ -524,14 +480,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  sendButtonDisabled: {
-    backgroundColor: "#90CAF9",
-  },
-  sendButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 15,
-  },
   sessionExpiredBanner: {
     backgroundColor: "#FFF3E0",
     borderBottomWidth: 1,
@@ -547,17 +495,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     color: "#E65100",
-  },
-  reloadButton: {
-    backgroundColor: "#E65100",
-    borderRadius: 12,
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-  },
-  reloadButtonText: {
-    color: "white",
-    fontSize: 13,
-    fontWeight: "bold",
   },
   locationOverlay: {
     position: "absolute",
@@ -590,17 +527,5 @@ const styles = StyleSheet.create({
     color: "#555",
     textAlign: "center",
     lineHeight: 21,
-  },
-  locationOverlayButton: {
-    backgroundColor: "#1976D2",
-    borderRadius: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    marginTop: 4,
-  },
-  locationOverlayButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 15,
   },
 });

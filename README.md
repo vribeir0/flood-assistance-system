@@ -2,12 +2,10 @@
 
 Chatbot de assistência para situações de alagamento. O usuário informa sua localização e o sistema retorna as condições climáticas atuais, avaliação de risco e uma rota de evacuação até um ponto seguro em tempo real.
 
-Desenvolvido como Trabalho de Conclusão de Curso na UTFPR.
-
 ## Stack
 
-**Backend** — Python · Flask-SocketIO · LangGraph · Google Gemini · MCP · Google Maps API · Open-Meteo API  
-**Frontend** — Expo (React Native Web) · TypeScript · Socket.IO client  
+**Backend** — Python · Flask· LangGraph · MCP · Google Maps API · Open-Meteo API  
+**Frontend** — Expo (React Native Web) 
 **Infra** — Docker Compose · Nginx · Gunicorn · Cloudflare (HTTPS)
 
 ## Estrutura
