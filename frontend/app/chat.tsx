@@ -206,6 +206,34 @@ export default function ChatScreen() {
           </View>
         )}
 
+        {/* Overlay de bloqueio — exibido enquanto localização não for concedida */}
+        {locationStatus !== "granted" && locationStatus !== "loading" && (
+          <View style={styles.locationOverlay}>
+            <View style={styles.locationOverlayCard}>
+              <Text style={styles.locationOverlayTitle}>
+                Localização necessária
+              </Text>
+              <Text style={styles.locationOverlayText}>
+                {locationStatus === "denied"
+                  ? "Você negou o acesso à localização. Para usar o chat, libere a permissão nas configurações do navegador e tente novamente."
+                  : locationStatus === "error"
+                  ? "Não foi possível obter sua localização. Verifique se o GPS está ativo e tente novamente."
+                  : "Este sistema precisa da sua localização para calcular rotas de evacuação e verificar condições meteorológicas na sua área."}
+              </Text>
+              <TouchableOpacity
+                style={styles.locationOverlayButton}
+                onPress={fetchLocation}
+              >
+                <Text style={styles.locationOverlayButtonText}>
+                  {locationStatus === "denied"
+                    ? "Tentar novamente"
+                    : "Permitir localização"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
         {/* Mensagens — ocupa todo o espaço restante */}
         <ScrollView
           ref={scrollViewRef}
@@ -467,5 +495,49 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 13,
     fontWeight: "bold",
+  },
+  locationOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  locationOverlayCard: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 32,
+    width: "85%",
+    maxWidth: 420,
+    alignItems: "center",
+    gap: 16,
+  },
+  locationOverlayTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#1976D2",
+    textAlign: "center",
+  },
+  locationOverlayText: {
+    fontSize: 14,
+    color: "#555",
+    textAlign: "center",
+    lineHeight: 21,
+  },
+  locationOverlayButton: {
+    backgroundColor: "#1976D2",
+    borderRadius: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    marginTop: 4,
+  },
+  locationOverlayButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 15,
   },
 });
