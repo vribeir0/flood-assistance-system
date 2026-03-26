@@ -174,19 +174,57 @@ export default function ChatScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Chat</Text>
-          <TouchableOpacity
-            style={[
-              styles.locationButton,
-              locationStatus === "granted" && styles.locationButtonActive,
-              locationStatus === "loading" && styles.locationButtonLoading,
-              (locationStatus === "denied" || locationStatus === "error") &&
-                styles.locationButtonError,
-            ]}
-            onPress={fetchLocation}
-            disabled={locationStatus === "loading"}
-          >
-            <Text style={styles.locationButtonText}>{locationLabel}</Text>
-          </TouchableOpacity>
+          {Platform.OS === "web" ? (
+            <button
+              onClick={fetchLocation}
+              disabled={locationStatus === "loading"}
+              style={{
+                cursor: locationStatus === "loading" ? "default" : "pointer",
+                border: `1px solid ${
+                  locationStatus === "granted"
+                    ? "#A5D6A7"
+                    : locationStatus === "loading"
+                    ? "#FFF176"
+                    : locationStatus === "denied" || locationStatus === "error"
+                    ? "#FFCC80"
+                    : "#90CAF9"
+                }`,
+                backgroundColor:
+                  locationStatus === "granted"
+                    ? "#E8F5E9"
+                    : locationStatus === "loading"
+                    ? "#FFF9C4"
+                    : locationStatus === "denied" || locationStatus === "error"
+                    ? "#FFF3E0"
+                    : "#E3F2FD",
+                borderRadius: 20,
+                paddingTop: 6,
+                paddingBottom: 6,
+                paddingLeft: 12,
+                paddingRight: 12,
+                fontSize: 13,
+                color: "#444",
+                fontWeight: "500",
+                fontFamily: "inherit",
+              }}
+            >
+              {locationLabel}
+            </button>
+          ) : (
+            <TouchableOpacity
+              style={[
+                styles.locationButton,
+                locationStatus === "granted" && styles.locationButtonActive,
+                locationStatus === "loading" && styles.locationButtonLoading,
+                (locationStatus === "denied" || locationStatus === "error") &&
+                  styles.locationButtonError,
+              ]}
+              onPress={fetchLocation}
+              disabled={locationStatus === "loading"}
+            >
+              <Text style={styles.locationButtonText}>{locationLabel}</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Banner de sessão expirada */}
@@ -220,16 +258,41 @@ export default function ChatScreen() {
                   ? "Não foi possível obter sua localização. Verifique se o GPS está ativo e tente novamente."
                   : "Este sistema precisa da sua localização para calcular rotas de evacuação e verificar condições meteorológicas na sua área."}
               </Text>
-              <TouchableOpacity
-                style={styles.locationOverlayButton}
-                onPress={fetchLocation}
-              >
-                <Text style={styles.locationOverlayButtonText}>
+              {Platform.OS === "web" ? (
+                <button
+                  onClick={fetchLocation}
+                  style={{
+                    cursor: "pointer",
+                    backgroundColor: "#1976D2",
+                    border: "none",
+                    borderRadius: 24,
+                    paddingTop: 12,
+                    paddingBottom: 12,
+                    paddingLeft: 32,
+                    paddingRight: 32,
+                    marginTop: 4,
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: 15,
+                    fontFamily: "inherit",
+                  }}
+                >
                   {locationStatus === "denied"
                     ? "Tentar novamente"
                     : "Permitir localização"}
-                </Text>
-              </TouchableOpacity>
+                </button>
+              ) : (
+                <TouchableOpacity
+                  style={styles.locationOverlayButton}
+                  onPress={fetchLocation}
+                >
+                  <Text style={styles.locationOverlayButtonText}>
+                    {locationStatus === "denied"
+                      ? "Tentar novamente"
+                      : "Permitir localização"}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         )}
