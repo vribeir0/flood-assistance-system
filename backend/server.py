@@ -3,11 +3,56 @@ import logging
 import requests
 from mcp.server.fastmcp import FastMCP
 
-from settings import GOOGLE_MAPS_API_KEY, GOOGLE_MAPS_API_URL, WEATHER_API_URL
+from settings import (
+    GEO_CODE_API_KEY,
+    GEO_CODE_API_URL,
+    GOOGLE_MAPS_API_KEY,
+    GOOGLE_MAPS_API_URL,
+    WEATHER_API_URL,
+)
 
 logger = logging.getLogger(__name__)
 
 mcp = FastMCP("Geo")
+
+
+@mcp.tool()
+async def geocode_address(address: str) -> dict:
+    """Converte um endereço textual em coordenadas geográficas (latitude e longitude).
+
+    Use esta ferramenta sempre que o usuário fornecer um endereço textual e não houver
+    coordenadas disponíveis no contexto. O resultado deve ser usado nas demais ferramentas
+    que exigem latitude e longitude.
+
+    Args:
+        address (str): Endereço completo ou parcial a ser geocodificado.
+            Exemplos: "Rua XV de Novembro, 1000, Curitiba", "Av. Paulista, São Paulo"
+
+    Returns:
+        dict: Resultado da geocodificação contendo:
+            - latitude (float): Latitude do endereço.
+            - longitude (float): Longitude do endereço.
+            - display_name (str): Endereço formatado encontrado pela API.
+          Ou em caso de erro:
+            - error (str): Descrição do problema.
+    """
+    params = {"q": address, "api_key": GEO_CODE_API_KEY}
+    response = requests.get(GEO_CODE_API_URL, params=params)
+    logger.info("Geocoding API status: %s", response.status_code)
+
+    if response.status_code != 200:
+        return {"error": f"Falha na requisição: {response.status_code}"}
+
+    results = response.json()
+    if not results:
+        return {"error": f"Nenhum resultado encontrado para o endereço: {address}"}
+
+    best = results[0]
+    return {
+        "latitude": float(best["lat"]),
+        "longitude": float(best["lon"]),
+        "display_name": best.get("display_name", ""),
+    }
 
 
 @mcp.tool()

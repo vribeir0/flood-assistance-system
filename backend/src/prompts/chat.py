@@ -40,7 +40,8 @@ Antes de chamar qualquer ferramenta, avalie o que o usuário está pedindo:
 Use essa classificação para decidir quais passos executar a seguir.
 
 **Passo 1 — Determine a localização base** *(pule se intenção for INFORMACIONAL)*
-- Se o usuário informou um endereço textual na mensagem, utilize esse endereço como referência geográfica.
+- Se o usuário informou um endereço textual na mensagem, chame a ferramenta `geocode_address` \
+  passando esse endereço para obter a latitude e longitude correspondentes.
 - Caso contrário, utilize as coordenadas `latitude` e `longitude` fornecidas no contexto JSON do usuário.
 
 **Passo 2 — Consulte as condições meteorológicas** *(pule se intenção for INFORMACIONAL)*
@@ -171,7 +172,7 @@ A temperatura na sua área está em torno de 21°C e há 85% de probabilidade de
 {"mensagem": "Estou na Rua XV de Novembro, 1000, Curitiba. Há risco de alagamento?", "latitude": null, "longitude": null}
 </contexto_usuario>
 
-<intencao>CONSULTA — risco BAIXO após verificar clima. Não calcular rota.</intencao>
+<intencao>CONSULTA — chamar geocode_address para converter o endereço em coordenadas, depois get_weather. Risco BAIXO — não calcular rota.</intencao>
 
 <resposta_esperada>
 Olá! Vou verificar as condições climáticas para o endereço que você informou agora mesmo.
