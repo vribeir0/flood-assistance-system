@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import sys
 import threading
 
 from langchain_mcp_adapters.tools import load_mcp_tools
@@ -12,7 +13,7 @@ from settings import SERVER_PATH
 logger = logging.getLogger(__name__)
 
 server_params = StdioServerParameters(
-    command="python",
+    command=sys.executable,
     args=[SERVER_PATH],
     env={**os.environ},
 )

@@ -1,10 +1,18 @@
 {
     "name": "Flood Assistance System",
-    "image": "mcr.microsoft.com/devcontainers/python:3.10",
-    // Instala as dependências do projeto ao criar o container
-    "postCreateCommand": "uv sync",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "20"
+        }
+    },
+    // Instala as dependências do Python e do frontend ao criar o container
+    "postCreateCommand": "cd backend && uv sync && cd ../frontend && npm install && sudo chown -R $(whoami) .expo",
     "forwardPorts": [
-        5000
+        5000,
+        8081
     ],
     "customizations": {
         "vscode": {
@@ -13,12 +21,10 @@
                 "ms-python.vscode-pylance",
                 "ms-python.debugpy",
                 "charliermarsh.ruff",
-                "GitHub.copilot",
-                "GitHub.copilot-chat",
-                "ms-python.black-formatter"
+                "ms-python.black-formatter",
             ],
             "settings": {
-                "python.defaultInterpreterPath": "/workspaces/flood-assistance-system/.venv/bin/python",
+                "python.defaultInterpreterPath": "/workspaces/flood-assistance-system/backend/.venv/bin/python",
                 "editor.formatOnSave": true,
                 "[python]": {
                     "editor.defaultFormatter": "ms-python.black-formatter"

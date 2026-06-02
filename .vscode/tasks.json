@@ -1,0 +1,65 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Backend - Iniciar",
+            "type": "shell",
+            "command": "uv run python app.py",
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "presentation": {
+                "group": "dev",
+                "panel": "dedicated",
+                "reveal": "always"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "Frontend - Iniciar",
+            "type": "shell",
+            "command": "npx expo start --web --port 8081",
+            "options": {
+                "cwd": "${workspaceFolder}/frontend"
+            },
+            "presentation": {
+                "group": "dev",
+                "panel": "dedicated",
+                "reveal": "always"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "MCP Server - Debug",
+            "detail": "Inicia o servidor MCP isolado (apenas para testes — em operação normal é gerenciado pelo backend)",
+            "type": "shell",
+            "command": "uv run python server.py",
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "presentation": {
+                "group": "dev",
+                "panel": "dedicated",
+                "reveal": "always"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "Iniciar Aplicação",
+            "detail": "Inicia backend e frontend em paralelo (o MCP server é gerenciado automaticamente pelo backend)",
+            "dependsOn": [
+                "Backend - Iniciar",
+                "Frontend - Iniciar"
+            ],
+            "dependsOrder": "parallel",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}

@@ -2,7 +2,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run Flask App",
+            "name": "Iniciar Aplicação",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/app.py",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "env": {
+                "FLASK_ENV": "development"
+            },
+            "jinja": true,
+            "console": "integratedTerminal",
+            "preLaunchTask": "Frontend - Iniciar"
+        },
+        {
+            "name": "Run Flask App (somente backend)",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/backend/app.py",

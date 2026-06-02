@@ -3,13 +3,14 @@ import os
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from flask import Flask, request
 from flask_socketio import SocketIO
 
-# Carrega o .env antes de qualquer import que dependa de variáveis de ambiente
 BASE_DIR = Path(__file__).parent
-load_dotenv(BASE_DIR / ".env", override=True)
+
+# Carrega o .env antes de qualquer import que dependa de variáveis de ambiente
+load_dotenv(find_dotenv(), override=True)
 
 sys.path.insert(0, str(BASE_DIR / "src"))
 
