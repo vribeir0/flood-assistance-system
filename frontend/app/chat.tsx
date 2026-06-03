@@ -59,6 +59,14 @@ export default function ChatScreen() {
 
     socket.on("connect_error", (error) => {
       console.error("Erro de conexão:", error);
+      if (error.message?.includes("rejected")) {
+        socket.disconnect();
+        if (typeof sessionStorage !== "undefined") {
+          sessionStorage.removeItem("captcha_verified");
+          sessionStorage.removeItem("captcha_session_token");
+        }
+        setSessionExpired(true);
+      }
     });
 
     socket.on("reconnect_failed", () => {
@@ -208,32 +216,37 @@ export default function ChatScreen() {
           </button>
         </View>
 
-        {/* Banner de sessão expirada */}
+        {/* Overlay bloqueante de sessão expirada */}
         {sessionExpired && (
-          <View style={styles.sessionExpiredBanner}>
-            <Text style={styles.sessionExpiredText}>
-              Sessão expirada. Recarregue a página para continuar.
-            </Text>
-            <button
-              onClick={() => window.location.reload()}
-              style={{
-                backgroundColor: "#E65100",
-                border: "none",
-                borderRadius: 12,
-                paddingTop: 5,
-                paddingBottom: 5,
-                paddingLeft: 12,
-                paddingRight: 12,
-                color: "white",
-                fontSize: 13,
-                fontWeight: "bold",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                lineHeight: "inherit",
-              }}
-            >
-              Recarregar
-            </button>
+          <View style={styles.locationOverlay}>
+            <View style={styles.locationOverlayCard}>
+              <Text style={styles.locationOverlayTitle}>Conexão perdida</Text>
+              <Text style={styles.locationOverlayText}>
+                A sessão expirou ou a conexão foi recusada pelo servidor.
+                Recarregue a página para reconectar.
+              </Text>
+              <button
+                onClick={() => window.location.reload()}
+                style={{
+                  backgroundColor: "#1976D2",
+                  border: "none",
+                  borderRadius: 24,
+                  paddingTop: 12,
+                  paddingBottom: 12,
+                  paddingLeft: 32,
+                  paddingRight: 32,
+                  color: "white",
+                  fontWeight: "bold",
+                  fontSize: 15,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  lineHeight: "inherit",
+                  width: "100%",
+                }}
+              >
+                Recarregar
+              </button>
+            </View>
           </View>
         )}
 
@@ -485,22 +498,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     justifyContent: "center",
     alignItems: "center",
-  },
-  sessionExpiredBanner: {
-    backgroundColor: "#FFF3E0",
-    borderBottomWidth: 1,
-    borderBottomColor: "#FFCC80",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  sessionExpiredText: {
-    flex: 1,
-    fontSize: 13,
-    color: "#E65100",
   },
   locationOverlay: {
     position: "absolute",
