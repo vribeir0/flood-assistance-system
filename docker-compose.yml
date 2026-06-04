@@ -1,9 +1,7 @@
 services:
   app:
     build: ./backend
-    env_file: .env
-    environment:
-      FLASK_ENV: production
+    env_file: .env.prod
     restart: unless-stopped
     # Porta 5000 não é exposta diretamente — só o Nginx é público
     expose:

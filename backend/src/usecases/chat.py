@@ -1,7 +1,8 @@
 import json
 import logging
 
-from domain.chat import ChatRequest
+import settings
+from domain.chat import ChatRequest, UserContext
 from gateways.llm_agent import LLMAgent
 from prompts.chat import SYSTEM_PROMPT
 from usecases.mcp_manager import MCPManager
@@ -10,29 +11,21 @@ logger = logging.getLogger(__name__)
 
 
 def _build_prompt(request: ChatRequest) -> dict:
-    """Monta a lista de mensagens: system prompt primeiro, depois o histórico da conversa,
-    e por último a nova mensagem do usuário.
+    """Monta a lista de mensagens: system prompt, histórico da conversa,
+    e a mensagem atual.
     """
-    # Constrói informações de contexto para adicionar ao system prompt
-    context_lines = []
-    if request.test_mode:
-        context_lines.append(
-            "MODO TESTE ATIVO: O sistema está em modo de teste. O risco deve ser tratado como ALTO, independentemente das condições meteorológicas reais."
-        )
-
-    context_section = ""
-    if context_lines:
-        context_section = "\n\n---\n\n# Contexto do Usuário\n\n" + "\n".join(
-            context_lines
-        )
-
-    system_prompt_with_context = SYSTEM_PROMPT + context_section
+    user_context = UserContext(
+        mensagem=request.message,
+        latitude=request.latitude,
+        longitude=request.longitude,
+        modo_teste=request.test_mode and settings.TEST_MODE_ENABLED,
+    )
 
     return {
         "messages": [
-            {"role": "system", "content": system_prompt_with_context},
+            {"role": "system", "content": SYSTEM_PROMPT},
             *[{"role": msg.role, "content": msg.content} for msg in request.history],
-            {"role": "user", "content": request.message},
+            {"role": "user", "content": user_context.to_json()},
         ]
     }
 

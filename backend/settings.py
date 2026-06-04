@@ -26,6 +26,9 @@ SERVER_PATH = os.path.join(BASE_DIR, os.getenv("SERVER_PATH", "server.py"))
 
 TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY", "")
 
+# Feature flags
+TEST_MODE_ENABLED = os.getenv("TEST_MODE_ENABLED", "true") == "true"
+
 # CORS — origens permitidas (separadas por vírgula no .env)
 # Exemplo: https://eventoshidrometereologicos.com.br,http://localhost
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost")
