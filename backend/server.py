@@ -25,7 +25,9 @@ async def geocode_address(address: str) -> dict:
     que exigem latitude e longitude.
 
     Args:
-        address (str): Endereço completo ou parcial a ser geocodificado.
+        address (str): Endereço completo ou parcial a ser geocodificado — extraído literalmente
+            do texto do usuário, sem adicionar caracteres extras, prefixos ou sufixos.
+            Passe apenas a parte que representa o endereço, removendo qualquer texto irrelevante.
             Exemplos: "Rua XV de Novembro, 1000, Curitiba", "Av. Paulista, São Paulo"
 
     Returns:

@@ -1,7 +1,5 @@
-export interface LocationCoords {
-  latitude: number;
-  longitude: number;
-}
+export type { LocationCoords } from "@/types/location";
+import type { LocationCoords } from "@/types/location";
 
 export const getCurrentLocation = async (): Promise<LocationCoords> => {
   // Expo exportado como Web estático — Platform.OS é sempre "web".

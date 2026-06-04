@@ -1,170 +1,69 @@
 import { Text, View } from "@/components/Themed";
-import { useEffect, useRef, useState } from "react";
-import { ScrollView, StyleSheet, TextInput } from "react-native";
-import Markdown from "react-native-markdown-display";
+import { useRef, useState } from "react";
+import { StyleSheet } from "react-native";
 
-import { LocationCoords } from "@/helpers/location";
-import { chatService } from "@/services/chatService";
-import { Message } from "@/types/chat";
-import { Socket } from "socket.io-client";
+import { ChatInput } from "@/components/chat/ChatInput";
+import { LocationModal } from "@/components/chat/LocationModal";
+import { MessageList } from "@/components/chat/MessageList";
+import { SessionExpiredModal } from "@/components/chat/SessionExpiredModal";
+import { useLocation } from "@/hooks/useLocation";
+import { useSocket } from "@/hooks/useSocket";
+import { ChatPayload, Message } from "@/types/chat";
+import { LocationCoords } from "@/types/location";
 
 export default function ChatScreen() {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [streamResponse, setStreamResponse] = useState("");
-  const scrollViewRef = useRef<ScrollView>(null);
-  const socketRef = useRef<Socket | null>(null);
-  const [location, setLocation] = useState<LocationCoords | null>(null);
-  const [locationStatus, setLocationStatus] = useState<
-    "idle" | "loading" | "granted" | "denied" | "error" | "skipped"
-  >("idle");
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [sessionExpired, setSessionExpired] = useState(false);
+  const pendingRef = useRef<{ text: string; history: Message[] } | null>(null);
 
-  const fetchLocation = () => {
-    if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
-      setLocationStatus("error");
-      return;
-    }
+  const { messages, isStreaming, streamResponse, sessionExpired, sendMessage } =
+    useSocket();
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-        setLocationStatus("granted");
-        setShowLocationModal(false);
-      },
-      (error) => {
-        setLocationStatus(
-          error.code === error.PERMISSION_DENIED ? "denied" : "error"
-        );
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
-    );
+  const { location, locationStatus, setLocationStatus, fetchLocation } =
+    useLocation((coords) => {
+      setShowLocationModal(false);
+      flushPending(coords);
+    });
 
-    // Atualiza o estado visual após disparar a requisição
-    setLocationStatus("loading");
+  const buildPayload = (
+    text: string,
+    history: Message[],
+    coords: LocationCoords | null
+  ): ChatPayload => ({
+    message: text,
+    history: history.map((m) => ({ text: m.text, source: m.source })),
+    ...(coords ?? {}),
+  });
+
+  const flushPending = (coords: LocationCoords | null) => {
+    if (!pendingRef.current) return;
+    const { text, history } = pendingRef.current;
+    pendingRef.current = null;
+    sendMessage(buildPayload(text, history, coords));
+    setMessage("");
   };
 
-  useEffect(() => {
-    socketRef.current = chatService.createWebSocket();
-    const socket = socketRef.current;
+  const handleSendMessage = () => {
+    if (!message.trim()) return;
 
-    socket.on("connect_error", (error) => {
-      console.error("Erro de conexão:", error);
-      if (error.message?.includes("rejected")) {
-        socket.disconnect();
-        if (typeof localStorage !== "undefined") {
-          localStorage.removeItem("captcha_verified");
-          localStorage.removeItem("captcha_session_token");
-          localStorage.removeItem("captcha_session_created_at");
-        }
-        setSessionExpired(true);
-      }
-    });
-
-    socket.on("reconnect_failed", () => {
-      if (typeof localStorage !== "undefined") {
-        localStorage.removeItem("captcha_verified");
-        localStorage.removeItem("captcha_session_token");
-        localStorage.removeItem("captcha_session_created_at");
-      }
-      setSessionExpired(true);
-    });
-
-    socket.on("chat_response", (data) => {
-      try {
-        let response;
-        if (typeof data === "string") {
-          response = JSON.parse(data);
-        } else if (data.data && typeof data.data === "string") {
-          response = JSON.parse(data.data);
-        } else {
-          response = data;
-        }
-
-        if (response.type === "token") {
-          setStreamResponse((prev) => prev + (response.reply || ""));
-          setIsStreaming(true);
-        } else if (response.type === "done") {
-          setIsStreaming(false);
-          setStreamResponse((currentStream) => {
-            if (currentStream.trim()) {
-              const botMessage: Message = {
-                text: currentStream,
-                source: "system",
-                timestamp: Date.now(),
-              };
-              setMessages((prev) => [...prev, botMessage]);
-            }
-            return "";
-          });
-        } else if (response.type === "error") {
-          setIsStreaming(false);
-          setStreamResponse("");
-          const errorMessage: Message = {
-            text: response.reply || "Erro desconhecido.",
-            source: "system",
-            timestamp: Date.now(),
-          };
-          setMessages((prev) => [...prev, errorMessage]);
-        }
-      } catch (e) {
-        console.error("Erro ao processar resposta:", e);
-        const botMessage: Message = {
-          text: data.data || "Erro ao processar resposta",
-          source: "system",
-          timestamp: Date.now(),
-        };
-        setMessages((prev) => [...prev, botMessage]);
-        setIsStreaming(false);
-        setStreamResponse("");
-      }
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    scrollViewRef.current?.scrollToEnd({ animated: true });
-  }, [messages, streamResponse]);
-
-  const handleSendMessage = async () => {
-    if (!message.trim() || !socketRef.current) return;
-
-    if (locationStatus !== "granted" && locationStatus !== "skipped") {
-      setShowLocationModal(true);
+    if (locationStatus === "granted") {
+      sendMessage(buildPayload(message, messages, location));
+      setMessage("");
       return;
     }
 
-    const userMessage: Message = {
-      text: message,
-      source: "user",
-      timestamp: Date.now(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
-
-    const messageData: any = {
-      message,
-      history: messages.map((m) => ({ text: m.text, source: m.source })),
-    };
-    if (location) {
-      messageData.latitude = location.latitude;
-      messageData.longitude = location.longitude;
+    if (
+      locationStatus === "skipped" ||
+      locationStatus === "denied" ||
+      locationStatus === "error"
+    ) {
+      sendMessage(buildPayload(message, messages, null));
+      setMessage("");
+      return;
     }
 
-    socketRef.current.emit("chat_message", messageData);
-    setMessage("");
-    setIsStreaming(true);
+    pendingRef.current = { text: message, history: messages };
+    setShowLocationModal(true);
   };
 
   const locationLabel =
@@ -181,7 +80,6 @@ export default function ChatScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.chatWrapper}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Chat</Text>
           <button
@@ -189,15 +87,7 @@ export default function ChatScreen() {
             disabled={locationStatus === "loading"}
             style={{
               cursor: locationStatus === "loading" ? "default" : "pointer",
-              border: `1px solid ${
-                locationStatus === "granted"
-                  ? "#A5D6A7"
-                  : locationStatus === "loading"
-                  ? "#FFF176"
-                  : locationStatus === "denied" || locationStatus === "error"
-                  ? "#FFCC80"
-                  : "#90CAF9"
-              }`,
+              border: `1px solid ${locationStatus === "granted" ? "#A5D6A7" : locationStatus === "loading" ? "#FFF176" : locationStatus === "denied" || locationStatus === "error" ? "#FFCC80" : "#90CAF9"}`,
               backgroundColor:
                 locationStatus === "granted"
                   ? "#E8F5E9"
@@ -214,7 +104,6 @@ export default function ChatScreen() {
               fontSize: 13,
               color: "#444",
               fontWeight: "500",
-
               fontFamily: "inherit",
               lineHeight: "inherit",
             }}
@@ -223,210 +112,36 @@ export default function ChatScreen() {
           </button>
         </View>
 
-        {/* Overlay bloqueante de sessão expirada */}
-        {sessionExpired && (
-          <View style={styles.locationOverlay}>
-            <View style={styles.locationOverlayCard}>
-              <Text style={styles.locationOverlayTitle}>Conexão perdida</Text>
-              <Text style={styles.locationOverlayText}>
-                A sessão expirou ou a conexão foi recusada pelo servidor.
-                Recarregue a página para reconectar.
-              </Text>
-              <button
-                onClick={() => window.location.reload()}
-                style={{
-                  backgroundColor: "#1976D2",
-                  border: "none",
-                  borderRadius: 24,
-                  paddingTop: 12,
-                  paddingBottom: 12,
-                  paddingLeft: 32,
-                  paddingRight: 32,
-                  color: "white",
-                  fontWeight: "bold",
-                  fontSize: 15,
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                  lineHeight: "inherit",
-                  width: "100%",
-                }}
-              >
-                Recarregar
-              </button>
-            </View>
-          </View>
-        )}
+        {sessionExpired && <SessionExpiredModal />}
 
         {showLocationModal && (
-          <View style={styles.locationOverlay}>
-            <View style={styles.locationOverlayCard}>
-              <Text style={styles.locationOverlayTitle}>
-                Localização necessária
-              </Text>
-              <Text style={styles.locationOverlayText}>
-                {locationStatus === "denied"
-                  ? "Você negou o acesso à localização. Para respostas precisas, libere a permissão nas configurações do navegador e tente novamente."
-                  : locationStatus === "error"
-                  ? "Não foi possível obter sua localização. Verifique se o GPS está ativo e tente novamente."
-                  : "Para fornecer rotas de evacuação e condições meteorológicas da sua área, este sistema precisa da sua localização."}
-              </Text>
-              <button
-                onClick={fetchLocation}
-                disabled={locationStatus === "loading"}
-                style={{
-                  cursor: locationStatus === "loading" ? "default" : "pointer",
-                  backgroundColor:
-                    locationStatus === "loading" ? "#90CAF9" : "#1976D2",
-                  border: "none",
-                  borderRadius: 24,
-                  paddingTop: 12,
-                  paddingBottom: 12,
-                  paddingLeft: 32,
-                  paddingRight: 32,
-                  color: "white",
-                  fontWeight: "bold",
-                  fontSize: 15,
-                  fontFamily: "inherit",
-                  lineHeight: "inherit",
-                  width: "100%",
-                }}
-              >
-                {locationStatus === "loading"
-                  ? "Obtendo..."
-                  : locationStatus === "denied" || locationStatus === "error"
-                  ? "Tentar novamente"
-                  : "Permitir localização"}
-              </button>
-              <button
-                onClick={() => {
-                  setShowLocationModal(false);
-                  setLocationStatus("skipped");
-                }}
-                style={{
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
-                  border: "1px solid #9E9E9E",
-                  borderRadius: 24,
-                  paddingTop: 10,
-                  paddingBottom: 10,
-                  paddingLeft: 32,
-                  paddingRight: 32,
-                  color: "#757575",
-                  fontWeight: "500",
-                  fontSize: 14,
-                  fontFamily: "inherit",
-                  lineHeight: "inherit",
-                  width: "100%",
-                }}
-              >
-                Continuar sem localização
-              </button>
-            </View>
-          </View>
+          <LocationModal
+            locationStatus={locationStatus}
+            onAllow={fetchLocation}
+            onSkip={() => {
+              setShowLocationModal(false);
+              setLocationStatus("skipped");
+              flushPending(null);
+            }}
+          />
         )}
 
-        {/* Mensagens — ocupa todo o espaço restante */}
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.messagesContainer}
-          contentContainerStyle={styles.messagesList}
-          onContentSizeChange={() =>
-            scrollViewRef.current?.scrollToEnd({ animated: true })
-          }
-        >
-          {messages.length === 0 && !isStreaming && (
-            <Text style={styles.emptyText}>
-              Envie uma mensagem para começar.
-            </Text>
-          )}
-          {messages.map((msg, idx) => (
-            <View
-              key={idx}
-              style={[
-                styles.messageBox,
-                msg.source === "user"
-                  ? styles.userMessage
-                  : styles.systemMessage,
-              ]}
-            >
-              {msg.source === "user" ? (
-                <Text style={styles.messageText}>{msg.text}</Text>
-              ) : (
-                <Markdown style={markdownStyles}>{msg.text}</Markdown>
-              )}
-            </View>
-          ))}
-          {isStreaming && (
-            <View style={[styles.messageBox, styles.systemMessage]}>
-              {streamResponse.trim() ? (
-                <Markdown style={markdownStyles}>{streamResponse}</Markdown>
-              ) : (
-                <Text style={[styles.messageText, styles.waitingText]}>
-                  Aguardando resposta...
-                </Text>
-              )}
-            </View>
-          )}
-        </ScrollView>
+        <MessageList
+          messages={messages}
+          isStreaming={isStreaming}
+          streamResponse={streamResponse}
+        />
 
-        {/* Input fixo na base */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.textInput}
-            value={message}
-            onChangeText={setMessage}
-            onSubmitEditing={handleSendMessage}
-            editable={!isStreaming}
-            returnKeyType="send"
-            placeholder="Digite sua mensagem..."
-            placeholderTextColor="gray"
-            multiline={false}
-          />
-          <button
-            onClick={handleSendMessage}
-            disabled={isStreaming}
-            style={{
-              backgroundColor: isStreaming ? "#90CAF9" : "#1976D2",
-              border: "none",
-              borderRadius: 24,
-              paddingTop: 11,
-              paddingBottom: 11,
-              paddingLeft: 20,
-              paddingRight: 20,
-              color: "white",
-              fontWeight: "bold",
-              fontSize: 15,
-              cursor: isStreaming ? "default" : "pointer",
-              fontFamily: "inherit",
-              lineHeight: "inherit",
-            }}
-          >
-            Enviar
-          </button>
-        </View>
+        <ChatInput
+          value={message}
+          onChange={setMessage}
+          onSend={handleSendMessage}
+          disabled={isStreaming}
+        />
       </View>
     </View>
   );
 }
-
-const markdownStyles = {
-  body: { fontSize: 15, color: "#333" },
-  code_inline: {
-    backgroundColor: "#f0f0f0",
-    borderRadius: 4,
-    paddingHorizontal: 4,
-    fontFamily: "monospace",
-  },
-  fence: {
-    backgroundColor: "#f0f0f0",
-    borderRadius: 6,
-    padding: 10,
-    fontFamily: "monospace",
-    fontSize: 13,
-  },
-  strong: { fontWeight: "bold" as const },
-  em: { fontStyle: "italic" as const },
-};
 
 const styles = StyleSheet.create({
   container: {
@@ -442,7 +157,6 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 800,
     backgroundColor: "white",
-    // garante que o wrapper ocupe toda a altura e organize os filhos em coluna
     display: "flex",
     flexDirection: "column",
   },
@@ -460,106 +174,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "#1976D2",
-  },
-
-  messagesContainer: {
-    flex: 1,
-  },
-  messagesList: {
-    padding: 12,
-    paddingBottom: 16,
-    flexGrow: 1,
-  },
-  emptyText: {
-    textAlign: "center",
-    color: "#aaa",
-    fontSize: 14,
-    marginTop: 40,
-    paddingHorizontal: 20,
-  },
-  messageBox: {
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-    maxWidth: "80%",
-  },
-  userMessage: {
-    backgroundColor: "#DCF8C6",
-    alignSelf: "flex-end",
-  },
-  systemMessage: {
-    backgroundColor: "#F0F0F0",
-    alignSelf: "flex-start",
-  },
-  messageText: {
-    fontSize: 15,
-    color: "#222",
-  },
-  waitingText: {
-    color: "gray",
-    fontStyle: "italic",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
-    backgroundColor: "white",
-    // garante que o input nunca saia da tela
-    flexShrink: 0,
-  },
-  textInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginRight: 8,
-    fontSize: 15,
-    backgroundColor: "#fafafa",
-    maxHeight: 80,
-  },
-  sendButton: {
-    backgroundColor: "#1976D2",
-    borderRadius: 24,
-    paddingVertical: 11,
-    paddingHorizontal: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  locationOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.55)",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 10,
-  },
-  locationOverlayCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 32,
-    width: "85%",
-    maxWidth: 420,
-    alignItems: "center",
-    gap: 16,
-  },
-  locationOverlayTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#1976D2",
-    textAlign: "center",
-  },
-  locationOverlayText: {
-    fontSize: 14,
-    color: "#555",
-    textAlign: "center",
-    lineHeight: 21,
   },
 });
