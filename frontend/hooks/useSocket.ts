@@ -29,7 +29,6 @@ export function useSocket() {
   ]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamResponse, setStreamResponse] = useState("");
-  const [connectionLost, setConnectionLost] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPayloadRef = useRef<ChatPayload | null>(null);
@@ -63,18 +62,22 @@ export function useSocket() {
       if (error.message?.includes("rejected")) {
         socket.disconnect();
         clearSession();
+        setMessages((prev) => [
+          ...prev,
+          Message.fromSystem("Sua sessão expirou. Recarregue a página para continuar."),
+        ]);
       }
-      setConnectionLost(true);
     });
 
     socket.on("reconnect_failed", () => {
       clearSession();
-      setConnectionLost(true);
+      setMessages((prev) => [
+        ...prev,
+        Message.fromSystem("Não foi possível reconectar. Recarregue a página para continuar."),
+      ]);
     });
 
     socket.on("connect", () => {
-      setConnectionLost(false);
-
       if (pendingPayloadRef.current) {
         const payload = pendingPayloadRef.current;
         pendingPayloadRef.current = null;
@@ -85,7 +88,6 @@ export function useSocket() {
     });
 
     socket.on("disconnect", () => {
-      setConnectionLost(true);
       clearStreamTimeout();
       setIsStreaming(false);
       setStreamResponse((current) => {
@@ -157,5 +159,5 @@ export function useSocket() {
     resetTimeout();
   };
 
-  return { messages, isStreaming, streamResponse, connectionLost, sendMessage };
+  return { messages, isStreaming, streamResponse, sendMessage };
 }

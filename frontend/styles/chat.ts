@@ -65,22 +65,6 @@ export function getTestModeButtonStyle(active: boolean): React.CSSProperties {
   };
 }
 
-export const connectionLostBarStyle: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 8,
-  width: "100%",
-  padding: "10px 16px",
-  backgroundColor: "#FFF3E0",
-  border: "none",
-  borderBottom: "1px solid #FFCC80",
-  color: "#E65100",
-  fontSize: 13,
-  fontWeight: "500",
-  fontFamily: "inherit",
-  cursor: "pointer",
-};
 
 export const styles = StyleSheet.create({
   container: {

@@ -13,7 +13,6 @@ import {
   getLocationButtonStyle,
   getTestModeButtonStyle,
   testModeBannerStyle,
-  connectionLostBarStyle,
 } from "@/styles/chat";
 
 export default function ChatScreen() {
@@ -22,8 +21,7 @@ export default function ChatScreen() {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const pendingRef = useRef<{ text: string; history: Message[] } | null>(null);
 
-  const { messages, isStreaming, streamResponse, connectionLost, sendMessage } =
-    useSocket();
+  const { messages, isStreaming, streamResponse, sendMessage } = useSocket();
 
   const { location, locationStatus, setLocationStatus, fetchLocation } =
     useLocation((coords) => {
@@ -111,15 +109,6 @@ export default function ChatScreen() {
             Modo de teste ativo. O risco será tratado como alto, independente do
             clima real.
           </div>
-        )}
-
-        {connectionLost && (
-          <button
-            onClick={() => window.location.reload()}
-            style={connectionLostBarStyle}
-          >
-            Conexão perdida. Clique aqui para reconectar
-          </button>
         )}
 
         {showLocationModal && (
