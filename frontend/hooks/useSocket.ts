@@ -51,6 +51,7 @@ export function useSocket(): UseSocketResult {
   const [connectionLost, setConnectionLost] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingPayloadRef = useRef<ChatPayload | null>(null);
 
   const resetTimeout = useCallback(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -92,6 +93,14 @@ export function useSocket(): UseSocketResult {
 
     socket.on("connect", () => {
       setConnectionLost(false);
+
+      if (pendingPayloadRef.current) {
+        const payload = pendingPayloadRef.current;
+        pendingPayloadRef.current = null;
+        socket.emit("chat_message", payload);
+        setIsStreaming(true);
+        resetTimeout();
+      }
     });
 
     socket.on("disconnect", () => {
@@ -154,17 +163,14 @@ export function useSocket(): UseSocketResult {
   const sendMessage = (payload: ChatPayload) => {
     if (!socketRef.current) return;
 
+    setMessages((prev) => [...prev, Message.fromUser(payload.message)]);
+
     if (!socketRef.current.connected) {
-      setMessages((prev) => [
-        ...prev,
-        Message.fromSystem(
-          "Ocorreu um problema interno. Por favor, tente novamente."
-        ),
-      ]);
+      pendingPayloadRef.current = payload;
+      socketRef.current.connect();
       return;
     }
 
-    setMessages((prev) => [...prev, Message.fromUser(payload.message)]);
     socketRef.current.emit("chat_message", payload);
     setIsStreaming(true);
     resetTimeout();
