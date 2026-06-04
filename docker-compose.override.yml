@@ -2,6 +2,7 @@
 # Para produção, use: docker compose -f docker-compose.yml up
 services:
   app:
+    env_file: .env.dev
     environment:
       FLASK_ENV: development
     ports:
