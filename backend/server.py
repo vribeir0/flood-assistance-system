@@ -36,22 +36,28 @@ async def geocode_address(address: str) -> dict:
           Ou em caso de erro:
             - error (str): Descrição do problema.
     """
-    params = {"q": address, "api_key": GEO_CODE_API_KEY}
+    params = {"address": address, "key": GEO_CODE_API_KEY}
     response = requests.get(GEO_CODE_API_URL, params=params)
-    logger.info("Geocoding API status: %s", response.status_code)
+    logger.info(
+        "Geocoding API status=%s body=%s", response.status_code, response.text[:300]
+    )
 
     if response.status_code != 200:
-        return {"error": f"Falha na requisição: {response.status_code}"}
+        return {
+            "error": f"Falha na requisição: {response.status_code} — {response.text[:200]}"
+        }
 
-    results = response.json()
+    data = response.json()
+    results = data.get("results", [])
     if not results:
         return {"error": f"Nenhum resultado encontrado para o endereço: {address}"}
 
     best = results[0]
+    loc = best["geometry"]["location"]
     return {
-        "latitude": float(best["lat"]),
-        "longitude": float(best["lon"]),
-        "display_name": best.get("display_name", ""),
+        "latitude": loc["lat"],
+        "longitude": loc["lng"],
+        "display_name": best.get("formatted_address", ""),
     }
 
 
@@ -100,6 +106,7 @@ async def get_directions_with_steps(
                         - duration (dict): Duração deste passo
                         - maneuver (str, opcional): Tipo de manobra (ex: "turn-right", "merge", etc.)
             - summary (str): Descrição resumida da rota
+            - maps_link (str): Link direto para abrir a rota no Google Maps
     """
 
     origin = f"{origin_waypoint['latitude']},{origin_waypoint['longitude']}"
@@ -124,6 +131,14 @@ async def get_directions_with_steps(
         }
 
     result = response.json()
+
+    maps_link = (
+        f"https://www.google.com/maps/dir/?api=1"
+        f"&origin={origin}"
+        f"&destination={destination}"
+        f"&travelmode=driving"
+    )
+    result["maps_link"] = maps_link
 
     return result
 

@@ -74,5 +74,5 @@ docker compose -f docker-compose.yml up --build -d
 
 Sobe apenas dois serviços: `app` (Gunicorn) e `nginx` (serve o frontend estático e faz proxy do backend).
 
-> **Importante:** use `-f docker-compose.yml` para ignorar o `docker-compose.override.yml` (desenvolvimento). Sem essa flag, serão 3 serviços incluindo o Expo dev server.
+> **Importante:** use `-f docker-compose.yml` para igno>rar o `docker-compose.override.yml` (desenvolvimento).
 
