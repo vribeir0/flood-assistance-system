@@ -94,6 +94,18 @@ export function useSocket(): UseSocketResult {
       setConnectionLost(false);
     });
 
+    socket.on("disconnect", () => {
+      setConnectionLost(true);
+      clearStreamTimeout();
+      setIsStreaming(false);
+      setStreamResponse((current) => {
+        if (current.trim()) {
+          setMessages((prev) => [...prev, Message.fromSystem(current)]);
+        }
+        return "";
+      });
+    });
+
     socket.on("chat_response", (data) => {
       try {
         const response = parseResponse(data) as {
@@ -141,6 +153,17 @@ export function useSocket(): UseSocketResult {
 
   const sendMessage = (payload: ChatPayload) => {
     if (!socketRef.current) return;
+
+    if (!socketRef.current.connected) {
+      setMessages((prev) => [
+        ...prev,
+        Message.fromSystem(
+          "Ocorreu um problema interno. Por favor, tente novamente."
+        ),
+      ]);
+      return;
+    }
+
     setMessages((prev) => [...prev, Message.fromUser(payload.message)]);
     socketRef.current.emit("chat_message", payload);
     setIsStreaming(true);

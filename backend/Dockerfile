@@ -18,4 +18,4 @@ COPY . .
 EXPOSE 5000
 
 # Gunicorn com worker threading para suporte a WebSocket
-CMD ["uv", "run", "gunicorn", "-k", "gthread", "--threads", "4", "-w", "1", "--timeout", "120", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["uv", "run", "gunicorn", "-k", "gthread", "--threads", "4", "-w", "1", "--timeout", "1800", "--bind", "0.0.0.0:5000", "app:app"]
