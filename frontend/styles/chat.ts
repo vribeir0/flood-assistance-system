@@ -68,20 +68,14 @@ export function getTestModeButtonStyle(active: boolean): React.CSSProperties {
 
 export const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#f0f2f5",
-    height: "100dvh" as any,
-    maxHeight: "100dvh" as any,
-    overflow: "hidden" as any,
-  },
-  chatWrapper: {
-    flex: 1,
-    alignSelf: "center",
+    height: "100%" as any,
     width: "100%",
     maxWidth: 800,
+    marginHorizontal: "auto" as any,
     backgroundColor: "white",
-    display: "flex",
+    display: "flex" as any,
     flexDirection: "column",
+    overflow: "hidden" as any,
   },
   header: {
     flexDirection: "row",

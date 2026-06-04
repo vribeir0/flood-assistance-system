@@ -1,7 +1,6 @@
 import { Text, View } from "@/components/Themed";
 import { useRouter } from "expo-router";
 import {
-  Platform,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -95,13 +94,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
-    ...(Platform.OS === "web"
-      ? {
-          height: "100dvh" as any,
-          maxHeight: "100dvh" as any,
-          overflow: "hidden" as any,
-        }
-      : {}),
   },
   content: {
     flexGrow: 1,

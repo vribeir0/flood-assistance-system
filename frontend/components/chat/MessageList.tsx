@@ -79,7 +79,7 @@ const markdownStyles = {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, minHeight: 0 },
   content: { padding: 12, paddingBottom: 16, flexGrow: 1 },
   emptyText: {
     textAlign: "center",

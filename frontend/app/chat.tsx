@@ -84,58 +84,56 @@ export default function ChatScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.chatWrapper}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Chat</Text>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <button
-              onClick={() => setTestMode((prev) => !prev)}
-              style={getTestModeButtonStyle(testMode)}
-            >
-              {testMode ? "⚠ Modo Teste" : "Modo Teste"}
-            </button>
-            <button
-              onClick={fetchLocation}
-              disabled={locationStatus === "loading"}
-              style={getLocationButtonStyle(locationStatus)}
-            >
-              {locationLabel}
-            </button>
-          </View>
+      <View style={styles.header}>
+        <Text style={styles.title}>Chat</Text>
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          <button
+            onClick={() => setTestMode((prev) => !prev)}
+            style={getTestModeButtonStyle(testMode)}
+          >
+            {testMode ? "⚠ Modo Teste" : "Modo Teste"}
+          </button>
+          <button
+            onClick={fetchLocation}
+            disabled={locationStatus === "loading"}
+            style={getLocationButtonStyle(locationStatus)}
+          >
+            {locationLabel}
+          </button>
         </View>
-
-        {testMode && (
-          <div style={testModeBannerStyle}>
-            Modo de teste ativo. O risco será tratado como alto, independente do
-            clima real.
-          </div>
-        )}
-
-        {showLocationModal && (
-          <LocationModal
-            locationStatus={locationStatus}
-            onAllow={fetchLocation}
-            onSkip={() => {
-              setShowLocationModal(false);
-              setLocationStatus("skipped");
-              flushPending(null);
-            }}
-          />
-        )}
-
-        <MessageList
-          messages={messages}
-          isStreaming={isStreaming}
-          streamResponse={streamResponse}
-        />
-
-        <ChatInput
-          value={message}
-          onChange={setMessage}
-          onSend={handleSendMessage}
-          disabled={isStreaming}
-        />
       </View>
+
+      {testMode && (
+        <div style={testModeBannerStyle}>
+          Modo de teste ativo. O risco será tratado como alto, independente do
+          clima real.
+        </div>
+      )}
+
+      {showLocationModal && (
+        <LocationModal
+          locationStatus={locationStatus}
+          onAllow={fetchLocation}
+          onSkip={() => {
+            setShowLocationModal(false);
+            setLocationStatus("skipped");
+            flushPending(null);
+          }}
+        />
+      )}
+
+      <MessageList
+        messages={messages}
+        isStreaming={isStreaming}
+        streamResponse={streamResponse}
+      />
+
+      <ChatInput
+        value={message}
+        onChange={setMessage}
+        onSend={handleSendMessage}
+        disabled={isStreaming}
+      />
     </View>
   );
 }

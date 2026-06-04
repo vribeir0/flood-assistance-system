@@ -12,7 +12,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1, shrink-to-fit=no, interactive-widget=resizes-content"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no, interactive-widget=resizes-content, viewport-fit=cover"
         />
 
         {/* 
@@ -47,13 +47,13 @@ button, input {
   font-family: inherit;
   font-size: inherit;
 }
-html, body {
-  height: 100dvh;
-  overflow: hidden;
-  width: 100%;
-}
-#root {
+html, body, #root {
   height: 100%;
+  margin: 0;
   overflow: hidden;
+}
+body {
+  padding-top: env(safe-area-inset-top, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 `;
