@@ -71,7 +71,7 @@ async def get_weather(lat: float, lon: float) -> str:
     params = {
         "latitude": lat,
         "longitude": lon,
-        "daily": "precipitation_probability_max",
+        "daily": "precipitation_sum,precipitation_probability_max",
         "hourly": "temperature_2m",
         "timezone": "auto",
         "forecast_days": 1,
