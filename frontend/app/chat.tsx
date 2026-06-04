@@ -153,7 +153,10 @@ export default function ChatScreen() {
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    const messageData: any = { message };
+    const messageData: any = {
+      message,
+      history: messages.map((m) => ({ text: m.text, source: m.source })),
+    };
     if (location) {
       messageData.latitude = location.latitude;
       messageData.longitude = location.longitude;

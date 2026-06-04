@@ -20,7 +20,9 @@ server_params = StdioServerParameters(
 
 
 class MCPManager:
-    """Mantém a conexão MCP aberta."""
+    """Singleton que mantém o processo do servidor MCP ativo e expõe suas ferramentas.
+    Inicialize uma vez na inicialização da aplicação; todo o resto usa get_instance().
+    """
 
     _instance = None
 
@@ -30,14 +32,16 @@ class MCPManager:
         self._ready = threading.Event()
 
     @classmethod
-    def get_instance(cls):
-        """Retorna a uma única instância do mcp"""
+    def get_instance(cls) -> "MCPManager":
+        """Retorna o MCPManager compartilhado, criando-o na primeira chamada."""
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
 
-    def start(self):
-        """Inicia a thread e conecta ao mcp"""
+    def start(self) -> None:
+        """Cria uma thread daemon com seu próprio event loop, conecta ao servidor MCP
+        e bloca até as ferramentas estarem prontas (timeout de 30 s).
+        """
         self._loop = asyncio.new_event_loop()
         self._ready.clear()
 
@@ -55,7 +59,9 @@ class MCPManager:
         logger.info("Conexão MCP pronta — tools: %s", [t.name for t in self._tools])
 
     async def _keep_alive(self) -> None:
-        """Abre a conexão MCP e a mantém executando"""
+        """Abre a conexão stdio, carrega as ferramentas, sinaliza que está pronto e então
+        fica parado em um asyncio.Event para manter a conexão ativa durante toda a vida do processo.
+        """
         async with stdio_client(server_params) as (read, write):
             async with ClientSession(read, write) as session:
                 await session.initialize()
@@ -69,4 +75,7 @@ class MCPManager:
         return self._tools
 
     def submit(self, coro):
+        """Agenda uma coroutine no event loop do MCP a partir de qualquer thread.
+        Retorna um Future.
+        """
         return asyncio.run_coroutine_threadsafe(coro, self._loop)
