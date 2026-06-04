@@ -42,6 +42,8 @@ socketio = SocketIO(
     app,
     cors_allowed_origins=ALLOWED_ORIGINS,
     async_mode="threading",
+    ping_interval=25,
+    ping_timeout=20,
 )
 
 initialize_chat_websocket(socketio)
