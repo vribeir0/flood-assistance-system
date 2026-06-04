@@ -105,6 +105,7 @@ export function useSocket() {
           reply?: string;
         };
         if (response.type === "token") {
+          pendingPayloadRef.current = null;
           setStreamResponse((prev) => prev + (response.reply ?? ""));
           setIsStreaming(true);
           resetTimeout();
@@ -154,6 +155,7 @@ export function useSocket() {
       return;
     }
 
+    pendingPayloadRef.current = payload;
     socketRef.current.emit("chat_message", payload);
     setIsStreaming(true);
     resetTimeout();
