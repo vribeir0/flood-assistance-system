@@ -11,7 +11,7 @@ type UseSocketResult = {
   messages: Message[];
   isStreaming: boolean;
   streamResponse: string;
-  sessionExpired: boolean;
+  connectionLost: boolean;
   sendMessage: (payload: ChatPayload) => void;
 };
 
@@ -40,7 +40,7 @@ export function useSocket(): UseSocketResult {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamResponse, setStreamResponse] = useState("");
-  const [sessionExpired, setSessionExpired] = useState(false);
+  const [connectionLost, setConnectionLost] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -73,13 +73,13 @@ export function useSocket(): UseSocketResult {
       if (error.message?.includes("rejected")) {
         socket.disconnect();
         clearSession();
-        setSessionExpired(true);
+        setConnectionLost(true);
       }
     });
 
     socket.on("reconnect_failed", () => {
       clearSession();
-      setSessionExpired(true);
+      setConnectionLost(true);
     });
 
     socket.on("chat_response", (data) => {
@@ -135,5 +135,5 @@ export function useSocket(): UseSocketResult {
     resetTimeout();
   };
 
-  return { messages, isStreaming, streamResponse, sessionExpired, sendMessage };
+  return { messages, isStreaming, streamResponse, connectionLost, sendMessage };
 }

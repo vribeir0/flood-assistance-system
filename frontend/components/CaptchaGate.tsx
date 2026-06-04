@@ -82,12 +82,30 @@ export default function CaptchaGate({
   useEffect(() => {
     setMounted(true);
 
+    const token = localStorage.getItem(SESSION_TOKEN_KEY);
     if (
       localStorage.getItem(SESSION_KEY) === "true" &&
-      localStorage.getItem(SESSION_TOKEN_KEY) &&
+      token &&
       isSessionValid()
     ) {
-      setVerified(true);
+      fetch(`${API_URL}/validate-session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.valid) {
+            setVerified(true);
+          } else {
+            clearSession();
+            setReady(true);
+          }
+        })
+        .catch(() => {
+          clearSession();
+          setReady(true);
+        });
       return;
     }
 

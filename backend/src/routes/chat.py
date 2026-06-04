@@ -69,7 +69,17 @@ def _is_rate_limited(sid: str) -> bool:
 
 
 def initialize_chat_routes(app: Flask) -> None:
-    """Registra a rota HTTP de verificação do Captcha."""
+    """Registra rotas HTTP de autenticação: verificação do Captcha e validação de sessão."""
+
+    @app.route("/validate-session", methods=["POST"])
+    def validate_session():
+        body = request.get_json(silent=True) or {}
+        token = body.get("token", "")
+        if not token:
+            return jsonify({"valid": False}), 200
+        _purge_expired_tokens()
+        is_valid = token in _valid_session_tokens
+        return jsonify({"valid": is_valid}), 200
 
     @app.route("/verify-captcha", methods=["POST"])
     def verify_captcha():
