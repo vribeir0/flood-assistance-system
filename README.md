@@ -62,15 +62,15 @@ O chat tem um botão "Modo Teste" no cabeçalho. Quando ativo, o sistema força 
 
 ## Desenvolvimento
 
-Sobe backend, frontend (Expo dev server) e Nginx como proxy:
+Sobe backend, frontend e Nginx como proxy:
 
 ```bash
 docker compose up --build
 ```
 
 - App: http://localhost
-- Frontend dev server: http://localhost:8081 (com hot-reload)
-- Backend: http://localhost:5000 (exposto para debug)
+- Frontend dev server: http://localhost:8081
+- Backend: http://localhost:5000 
 
 ## Produção
 
