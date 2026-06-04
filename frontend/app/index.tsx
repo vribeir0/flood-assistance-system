@@ -97,8 +97,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
     ...(Platform.OS === "web"
       ? {
-          height: "100vh" as any,
-          maxHeight: "100vh" as any,
+          height: "100dvh" as any,
+          maxHeight: "100dvh" as any,
           overflow: "hidden" as any,
         }
       : {}),
