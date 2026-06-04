@@ -136,7 +136,7 @@ export default function CaptchaGate({
       <View style={styles.card}>
         <Text style={styles.title}>Verificação de Segurança</Text>
         <Text style={styles.subtitle}>
-          Complete o desafio abaixo para acessar o sistema
+          Complete a verificação abaixo para continuar
         </Text>
         {verifyError && (
           <Text style={styles.errorText}>

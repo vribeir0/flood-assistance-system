@@ -43,7 +43,7 @@ class GenerateChatResponse:
             logger.exception("Erro ao gerar resposta do chat")
             emit(
                 json.dumps(
-                    {"type": "error", "reply": "Não foi possível gerar a resposta. Por favor, envie sua mensagem novamente."}
+                    {"type": "error", "reply": "Não consegui gerar a resposta. Tente enviar sua mensagem de novo."}
                 )
             )
             return

@@ -37,12 +37,10 @@ function parseResponse(data: unknown) {
 }
 
 const WELCOME_MESSAGE =
-  "Olá! Sou seu assistente de emergência para situações de alagamento. " +
-  "Posso informar as condições climáticas da sua região, avaliar riscos e gerar rotas de evacuação. " +
-  "Como posso ajudar?\n\n" +
-  "**Modo de teste disponível:** Ative o botão \"Modo Teste\" no topo da tela " +
-  "para simular uma situação de risco com alta probabilidade de alagamento, " +
-  "independente das condições reais.";
+  "Olá! Posso consultar o clima da sua região, avaliar o risco de alagamento " +
+  "e gerar uma rota de evacuação se for necessário. Como posso ajudar?\n\n" +
+  "Se quiser testar o sistema em um cenário de emergência, ative o " +
+  '"Modo Teste" no topo da tela.';
 
 export function useSocket(): UseSocketResult {
   const [messages, setMessages] = useState<Message[]>([
@@ -121,14 +119,14 @@ export function useSocket(): UseSocketResult {
           setStreamResponse("");
           setMessages((prev) => [
             ...prev,
-            Message.fromSystem(response.reply ?? "Erro desconhecido."),
+            Message.fromSystem(response.reply ?? "Ocorreu um erro inesperado."),
           ]);
         }
       } catch {
         clearStreamTimeout();
         setMessages((prev) => [
           ...prev,
-          Message.fromSystem("Erro ao processar resposta."),
+          Message.fromSystem("Não foi possível processar a resposta."),
         ]);
         setIsStreaming(false);
         setStreamResponse("");

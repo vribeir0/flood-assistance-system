@@ -11,10 +11,10 @@ type Props = {
 export function LocationModal({ locationStatus, onAllow, onSkip }: Props) {
   const bodyText =
     locationStatus === "denied"
-      ? "Você negou o acesso à localização. Para respostas precisas, libere a permissão nas configurações do navegador e tente novamente."
+      ? "O acesso à localização foi negado. Para resultados mais precisos, libere a permissão nas configurações do navegador."
       : locationStatus === "error"
-      ? "Não foi possível obter sua localização. Verifique se o GPS está ativo e tente novamente."
-      : "Para fornecer rotas de evacuação e condições meteorológicas da sua área, este sistema precisa da sua localização.";
+      ? "Não conseguimos obter sua localização. Verifique se o GPS está ativo e tente de novo."
+      : "Precisamos da sua localização para consultar o clima da região e calcular rotas de evacuação.";
 
   const allowLabel =
     locationStatus === "loading"

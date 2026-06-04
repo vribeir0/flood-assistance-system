@@ -18,15 +18,15 @@ export default function HomeScreen() {
             Sistema de Assistência contra Enchentes
           </Text>
           <Text style={styles.subtitle}>
-            Chatbot Inteligente para Orientação em Eventos Hidrometeorológicos
+            Orientação em eventos hidrometeorológicos extremos
           </Text>
         </View>
 
         <View style={styles.descriptionContainer}>
           <Text style={styles.sectionTitle}>Sobre o Sistema</Text>
           <Text style={styles.description}>
-            Chatbot desenvolvido para orientar usuários localizados em áreas de
-            risco durante eventos hidrometeorológicos extremos, como enchentes.
+            Um chatbot que orienta pessoas em áreas de risco durante enchentes
+            e alagamentos, com dados meteorológicos e rotas de evacuação.
           </Text>
 
           <View style={styles.featuresContainer}>
@@ -34,8 +34,7 @@ export default function HomeScreen() {
               <View style={styles.featureText}>
                 <Text style={styles.featureTitle}>Identificação de Riscos</Text>
                 <Text style={styles.featureDescription}>
-                  Interpreta situações relatadas e fornece recomendações
-                  preventivas.
+                  Avalia a situação relatada pelo usuário e sugere o que fazer.
                 </Text>
               </View>
             </View>
@@ -44,7 +43,8 @@ export default function HomeScreen() {
               <View style={styles.featureText}>
                 <Text style={styles.featureTitle}>Integração de Dados</Text>
                 <Text style={styles.featureDescription}>
-                  Consome dados de APIs metereológicas em tempo real.
+                  Consulta APIs meteorológicas em tempo real para avaliar o
+                  risco na região do usuário.
                 </Text>
               </View>
             </View>
@@ -53,8 +53,8 @@ export default function HomeScreen() {
               <View style={styles.featureText}>
                 <Text style={styles.featureTitle}>Agentes MCP</Text>
                 <Text style={styles.featureDescription}>
-                  Utiliza arquitetura de agentes baseados em LLM para análise de
-                  risco e formulação de respostas.
+                  Usa agentes LLM com protocolo MCP para buscar dados e montar
+                  as respostas.
                 </Text>
               </View>
             </View>
@@ -63,9 +63,8 @@ export default function HomeScreen() {
               <View style={styles.featureText}>
                 <Text style={styles.featureTitle}>Modo de Teste</Text>
                 <Text style={styles.featureDescription}>
-                  Ative o "Modo Teste" no chat para simular uma situação de
-                  risco com alta probabilidade de alagamento, independente das
-                  condições meteorológicas reais.
+                  Simula um cenário de risco alto no chat, sem depender das
+                  condições reais. Basta ativar no topo da tela de conversa.
                 </Text>
               </View>
             </View>
@@ -81,11 +80,10 @@ export default function HomeScreen() {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Sistema desenvolvido como parte do Trabalho de Conclusão de Curso
+            Trabalho de Conclusão de Curso
           </Text>
           <Text style={styles.footerText}>
-            Vinicius Santos Ribeiro - UTFPR - Universidade Tecnológica Federal
-            do Paraná
+            Vinicius Santos Ribeiro — UTFPR
           </Text>
         </View>
       </ScrollView>

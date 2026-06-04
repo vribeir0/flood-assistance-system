@@ -133,7 +133,7 @@ def initialize_chat_websocket(socketio):
             resultado.result()
         except Exception:
             logger.exception("Erro no WebSocket de chat — garantindo finalização")
-            emit(json.dumps({"type": "error", "reply": "Não foi possível gerar a resposta. Por favor, envie sua mensagem novamente."}))
+            emit(json.dumps({"type": "error", "reply": "Não consegui gerar a resposta. Tente enviar sua mensagem de novo."}))
             emit(json.dumps({"type": "done", "reply": ""}))
 
     @socketio.on("chat_message")
@@ -143,7 +143,7 @@ def initialize_chat_websocket(socketio):
         if sid not in _authenticated_sids:
             socketio.emit(
                 "chat_response",
-                json.dumps({"type": "error", "reply": "Sessão não autenticada."}),
+                json.dumps({"type": "error", "reply": "Sua sessão expirou. Recarregue a página para continuar."}),
                 to=sid,
             )
             return
@@ -154,7 +154,7 @@ def initialize_chat_websocket(socketio):
                 json.dumps(
                     {
                         "type": "error",
-                        "reply": f"Limite de {RATE_LIMIT_MAX} mensagens por minuto atingido. Aguarde um momento.",
+                        "reply": f"Muitas mensagens seguidas. Aguarde alguns segundos e tente de novo.",
                     }
                 ),
                 to=sid,

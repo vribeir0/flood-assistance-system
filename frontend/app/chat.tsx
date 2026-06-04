@@ -108,8 +108,8 @@ export default function ChatScreen() {
 
         {testMode && (
           <div style={testModeBannerStyle}>
-            ⚠ Modo de teste ativo — o sistema simulará uma situação de risco de
-            alagamento independente das condições reais.
+            Modo de teste ativo. O risco será tratado como alto, independente do
+            clima real.
           </div>
         )}
 
@@ -118,7 +118,7 @@ export default function ChatScreen() {
             onClick={() => window.location.reload()}
             style={connectionLostBarStyle}
           >
-            Conexão perdida. clique aqui para reconectar
+            Conexão perdida. Clique aqui para reconectar
           </button>
         )}
 
