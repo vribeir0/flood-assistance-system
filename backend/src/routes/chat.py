@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import requests
 from flask import Flask, request, jsonify
+from flask_socketio import ConnectionRefusedError
 from usecases.chat import GenerateChatResponse
 from usecases.mcp_manager import MCPManager
 from settings import TURNSTILE_SECRET_KEY
@@ -108,7 +109,7 @@ def initialize_chat_websocket(socketio):
         _purge_expired_tokens()
         if token not in _valid_session_tokens:
             logger.warning("Conexão WebSocket recusada — token inválido (sid=%s)", sid)
-            return False  # recusa a conexão
+            raise ConnectionRefusedError("rejected")
 
         _authenticated_sids.add(sid)
         logger.info("WebSocket autenticado (sid=%s)", sid)
