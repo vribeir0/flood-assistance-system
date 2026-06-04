@@ -17,7 +17,7 @@ export default function ChatScreen() {
   const socketRef = useRef<Socket | null>(null);
   const [location, setLocation] = useState<LocationCoords | null>(null);
   const [locationStatus, setLocationStatus] = useState<
-    "idle" | "loading" | "granted" | "denied" | "error"
+    "idle" | "loading" | "granted" | "denied" | "error" | "skipped"
   >("idle");
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -61,18 +61,20 @@ export default function ChatScreen() {
       console.error("Erro de conexão:", error);
       if (error.message?.includes("rejected")) {
         socket.disconnect();
-        if (typeof sessionStorage !== "undefined") {
-          sessionStorage.removeItem("captcha_verified");
-          sessionStorage.removeItem("captcha_session_token");
+        if (typeof localStorage !== "undefined") {
+          localStorage.removeItem("captcha_verified");
+          localStorage.removeItem("captcha_session_token");
+          localStorage.removeItem("captcha_session_created_at");
         }
         setSessionExpired(true);
       }
     });
 
     socket.on("reconnect_failed", () => {
-      if (typeof sessionStorage !== "undefined") {
-        sessionStorage.removeItem("captcha_verified");
-        sessionStorage.removeItem("captcha_session_token");
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("captcha_verified");
+        localStorage.removeItem("captcha_session_token");
+        localStorage.removeItem("captcha_session_created_at");
       }
       setSessionExpired(true);
     });
@@ -139,7 +141,7 @@ export default function ChatScreen() {
   const handleSendMessage = async () => {
     if (!message.trim() || !socketRef.current) return;
 
-    if (locationStatus !== "granted") {
+    if (locationStatus !== "granted" && locationStatus !== "skipped") {
       setShowLocationModal(true);
       return;
     }
@@ -152,8 +154,10 @@ export default function ChatScreen() {
     setMessages((prev) => [...prev, userMessage]);
 
     const messageData: any = { message };
-    messageData.latitude = location!.latitude;
-    messageData.longitude = location!.longitude;
+    if (location) {
+      messageData.latitude = location.latitude;
+      messageData.longitude = location.longitude;
+    }
 
     socketRef.current.emit("chat_message", messageData);
     setMessage("");
@@ -289,6 +293,30 @@ export default function ChatScreen() {
                   : locationStatus === "denied" || locationStatus === "error"
                   ? "Tentar novamente"
                   : "Permitir localização"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowLocationModal(false);
+                  setLocationStatus("skipped");
+                }}
+                style={{
+                  cursor: "pointer",
+                  backgroundColor: "transparent",
+                  border: "1px solid #9E9E9E",
+                  borderRadius: 24,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                  paddingLeft: 32,
+                  paddingRight: 32,
+                  color: "#757575",
+                  fontWeight: "500",
+                  fontSize: 14,
+                  fontFamily: "inherit",
+                  lineHeight: "inherit",
+                  width: "100%",
+                }}
+              >
+                Continuar sem localização
               </button>
             </View>
           </View>
