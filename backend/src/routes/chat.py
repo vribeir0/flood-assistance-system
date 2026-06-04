@@ -13,10 +13,8 @@ from settings import TURNSTILE_SECRET_KEY
 logger = logging.getLogger(__name__)
 
 
-# Autenticação — tokens de sessão emitidos após verificação do Captcha
-
 _valid_session_tokens: dict[str, dict] = {}
-SESSION_TOKEN_TTL = 3600  # segundos
+SESSION_TOKEN_TTL = 3600
 # SIDs autenticados nesta instância do servidor
 _authenticated_sids: set[str] = set()
 
@@ -133,7 +131,14 @@ def initialize_chat_websocket(socketio):
             resultado.result()
         except Exception:
             logger.exception("Erro no WebSocket de chat — garantindo finalização")
-            emit(json.dumps({"type": "error", "reply": "Não consegui gerar a resposta. Tente enviar sua mensagem de novo."}))
+            emit(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "reply": "Não consegui gerar a resposta. Tente enviar sua mensagem de novo.",
+                    }
+                )
+            )
             emit(json.dumps({"type": "done", "reply": ""}))
 
     @socketio.on("chat_message")
@@ -143,7 +148,12 @@ def initialize_chat_websocket(socketio):
         if sid not in _authenticated_sids:
             socketio.emit(
                 "chat_response",
-                json.dumps({"type": "error", "reply": "Sua sessão expirou. Recarregue a página para continuar."}),
+                json.dumps(
+                    {
+                        "type": "error",
+                        "reply": "Sua sessão expirou. Recarregue a página para continuar.",
+                    }
+                ),
                 to=sid,
             )
             return
