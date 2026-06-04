@@ -65,7 +65,6 @@ export function getTestModeButtonStyle(active: boolean): React.CSSProperties {
   };
 }
 
-
 export const styles = StyleSheet.create({
   container: {
     height: "100%" as any,
@@ -75,7 +74,8 @@ export const styles = StyleSheet.create({
     backgroundColor: "white",
     display: "flex" as any,
     flexDirection: "column",
-    overflow: "hidden" as any,
+    overflow: "visible" as any,
+    position: "relative" as any,
   },
   header: {
     flexDirection: "row",

@@ -12,8 +12,10 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1, shrink-to-fit=no, interactive-widget=resizes-content, viewport-fit=cover"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no, interactive-widget=resizes-content, viewport-fit=cover, user-scalable=no"
         />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="white" />
 
         {/* 
           Disable body scrolling on web. This makes ScrollView components work closer to how they do on native. 
@@ -23,6 +25,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
 
         {/* Using raw CSS styles as an escape-hatch to ensure the background color never flickers in dark-mode. */}
         <style dangerouslySetInnerHTML={{ __html: responsiveBackground }} />
+        <style dangerouslySetInnerHTML={{ __html: keyboardStyles }} />
         {/* Add any additional <head> elements that you want globally available on web... */}
       </head>
       <body>{children}</body>
@@ -51,5 +54,24 @@ html, body, #root {
 body {
   padding-top: env(safe-area-inset-top, 0);
   padding-bottom: env(safe-area-inset-bottom, 0);
+}
+`;
+
+const keyboardStyles = `
+input, textarea {
+  font-size: 16px;
+}
+
+@supports (padding: max(0px)) {
+  html, body, #root {
+    padding-left: max(env(safe-area-inset-left, 0), env(safe-area-inset-right, 0));
+    padding-right: max(env(safe-area-inset-left, 0), env(safe-area-inset-right, 0));
+  }
+}
+
+@media (max-height: 600px) {
+  html, body, #root {
+    height: 100vh;
+  }
 }
 `;

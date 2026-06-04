@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import { View, StyleSheet, TextInput, Platform } from "react-native";
 
 type Props = {
@@ -10,19 +10,47 @@ type Props = {
 
 export function ChatInput({ value, onChange, onSend, disabled }: Props) {
   const inputRef = useRef<TextInput>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    if (Platform.OS !== "web") return;
+
+    const viewport = (window as any).visualViewport;
+    if (!viewport) return;
+
+    const handleResize = () => {
+      const windowHeight = window.innerHeight;
+      const viewportHeight = viewport.height;
+      const keyboardHeightEstimate = Math.max(0, windowHeight - viewportHeight);
+      setKeyboardHeight(keyboardHeightEstimate);
+
+      const inputElement = inputRef.current as unknown as HTMLElement;
+      if (inputElement && keyboardHeightEstimate > 50) {
+        inputElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    };
+
+    viewport.addEventListener("resize", handleResize);
+    return () => viewport.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleFocus = () => {
     if (Platform.OS !== "web") return;
+    const inputElement = inputRef.current as unknown as HTMLElement;
     setTimeout(() => {
-      (inputRef.current as unknown as HTMLElement)?.scrollIntoView?.({
-        behavior: "smooth",
-        block: "nearest",
-      });
-    }, 300);
+      inputElement?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 100);
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      ref={containerRef}
+      style={[
+        styles.container,
+        keyboardHeight > 0 && { paddingBottom: Math.min(keyboardHeight, 80) },
+      ]}
+    >
       <TextInput
         ref={inputRef}
         style={styles.input}
