@@ -10,6 +10,7 @@ class UserContext(BaseModel):
     mensagem: str
     latitude: float | None = None
     longitude: float | None = None
+    modo_teste: bool = False
 
     def to_json(self) -> str:
         return self.model_dump_json()
@@ -20,6 +21,7 @@ class ChatRequest(BaseModel):
     message: str
     latitude: float | None = None
     longitude: float | None = None
+    test_mode: bool = False
     history: list[HistoryMessage] = []
 
     @classmethod
@@ -35,6 +37,7 @@ class ChatRequest(BaseModel):
             message=data.get("message", ""),
             latitude=data.get("latitude"),
             longitude=data.get("longitude"),
+            test_mode=data.get("test_mode", False),
             history=history,
         )
 
@@ -43,4 +46,5 @@ class ChatRequest(BaseModel):
             mensagem=self.message,
             latitude=self.latitude,
             longitude=self.longitude,
+            modo_teste=self.test_mode,
         )

@@ -31,6 +31,40 @@ export function getLocationButtonStyle(
   };
 }
 
+export const testModeBannerStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 8,
+  width: "100%",
+  boxSizing: "border-box",
+  padding: "8px 16px",
+  backgroundColor: "#FFF8F0",
+  borderBottom: "1px solid #F5D5B0",
+  color: "#BF6A30",
+  fontSize: 13,
+  fontWeight: "600",
+  fontFamily: "inherit",
+};
+
+export function getTestModeButtonStyle(active: boolean): React.CSSProperties {
+  return {
+    cursor: "pointer",
+    border: `1px solid ${active ? "#FFCC80" : "#90CAF9"}`,
+    backgroundColor: active ? "#FFF3E0" : "#E3F2FD",
+    borderRadius: 20,
+    paddingTop: 6,
+    paddingBottom: 6,
+    paddingLeft: 12,
+    paddingRight: 12,
+    fontSize: 13,
+    color: active ? "#E65100" : "#444",
+    fontWeight: "500",
+    fontFamily: "inherit",
+    lineHeight: "inherit",
+  };
+}
+
 export const connectionLostBarStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",

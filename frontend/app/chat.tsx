@@ -11,11 +11,14 @@ import { LocationCoords } from "@/types/location";
 import {
   styles,
   getLocationButtonStyle,
+  getTestModeButtonStyle,
+  testModeBannerStyle,
   connectionLostBarStyle,
 } from "@/styles/chat";
 
 export default function ChatScreen() {
   const [message, setMessage] = useState("");
+  const [testMode, setTestMode] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const pendingRef = useRef<{ text: string; history: Message[] } | null>(null);
 
@@ -36,6 +39,7 @@ export default function ChatScreen() {
     message: text,
     history: history.map((m) => ({ text: m.text, source: m.source })),
     ...(coords ?? {}),
+    ...(testMode ? { test_mode: true } : {}),
   });
 
   const flushPending = (coords: LocationCoords | null) => {
@@ -85,14 +89,29 @@ export default function ChatScreen() {
       <View style={styles.chatWrapper}>
         <View style={styles.header}>
           <Text style={styles.title}>Chat</Text>
-          <button
-            onClick={fetchLocation}
-            disabled={locationStatus === "loading"}
-            style={getLocationButtonStyle(locationStatus)}
-          >
-            {locationLabel}
-          </button>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <button
+              onClick={() => setTestMode((prev) => !prev)}
+              style={getTestModeButtonStyle(testMode)}
+            >
+              {testMode ? "⚠ Modo Teste" : "Modo Teste"}
+            </button>
+            <button
+              onClick={fetchLocation}
+              disabled={locationStatus === "loading"}
+              style={getLocationButtonStyle(locationStatus)}
+            >
+              {locationLabel}
+            </button>
+          </View>
         </View>
+
+        {testMode && (
+          <div style={testModeBannerStyle}>
+            ⚠ Modo de teste ativo — o sistema simulará uma situação de risco de
+            alagamento independente das condições reais.
+          </div>
+        )}
 
         {connectionLost && (
           <button

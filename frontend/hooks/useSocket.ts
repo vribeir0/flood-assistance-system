@@ -39,7 +39,10 @@ function parseResponse(data: unknown) {
 const WELCOME_MESSAGE =
   "Olá! Sou seu assistente de emergência para situações de alagamento. " +
   "Posso informar as condições climáticas da sua região, avaliar riscos e gerar rotas de evacuação. " +
-  "Como posso ajudar?";
+  "Como posso ajudar?\n\n" +
+  "**Modo de teste disponível:** Ative o botão \"Modo Teste\" no topo da tela " +
+  "para simular uma situação de risco com alta probabilidade de alagamento, " +
+  "independente das condições reais.";
 
 export function useSocket(): UseSocketResult {
   const [messages, setMessages] = useState<Message[]>([

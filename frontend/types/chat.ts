@@ -16,6 +16,7 @@ export interface ChatPayload {
   history: HistoryEntry[];
   latitude?: number;
   longitude?: number;
+  test_mode?: boolean;
 }
 
 export const Message = {

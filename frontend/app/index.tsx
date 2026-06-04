@@ -58,6 +58,17 @@ export default function HomeScreen() {
                 </Text>
               </View>
             </View>
+
+            <View style={styles.feature}>
+              <View style={styles.featureText}>
+                <Text style={styles.featureTitle}>Modo de Teste</Text>
+                <Text style={styles.featureDescription}>
+                  Ative o "Modo Teste" no chat para simular uma situação de
+                  risco com alta probabilidade de alagamento, independente das
+                  condições meteorológicas reais.
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
 
