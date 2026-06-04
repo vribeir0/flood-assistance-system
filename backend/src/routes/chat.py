@@ -122,12 +122,9 @@ def initialize_chat_websocket(socketio):
             resultado = mcp.submit(usecase(data, emit=emit))
             resultado.result()
         except Exception:
-            logger.exception("Erro no WebSocket de chat")
-            socketio.emit(
-                "chat_response",
-                json.dumps({"type": "error", "reply": "Falha ao processar mensagem."}),
-                to=sid,
-            )
+            logger.exception("Erro no WebSocket de chat — garantindo finalização")
+            emit(json.dumps({"type": "error", "reply": "Não foi possível gerar a resposta. Por favor, envie sua mensagem novamente."}))
+            emit(json.dumps({"type": "done", "reply": ""}))
 
     @socketio.on("chat_message")
     def handle_chat_message(data):

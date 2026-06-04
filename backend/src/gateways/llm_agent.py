@@ -1,9 +1,12 @@
+import logging
 from collections.abc import Callable
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import create_react_agent
 
 from settings import GEMINI_API_KEY, GEMINI_MODEL
+
+logger = logging.getLogger(__name__)
 
 
 class LLMAgent:
@@ -24,8 +27,12 @@ class LLMAgent:
         Não devolve a resposta completa — quem chama é responsável por montar
         ou emitir os tokens conforme chegam.
         """
-        async for event in self._agent.astream_events(prompt):
-            if event["event"] == "on_chat_model_stream":
-                content = event["data"]["chunk"].content
-                if content:
-                    on_token(content)
+        try:
+            async for event in self._agent.astream_events(prompt):
+                if event["event"] == "on_chat_model_stream":
+                    content = event["data"]["chunk"].content
+                    if content:
+                        on_token(content)
+        except Exception:
+            logger.exception("Erro durante streaming do agente")
+            raise

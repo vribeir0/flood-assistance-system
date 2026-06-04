@@ -32,10 +32,20 @@ class GenerateChatResponse:
         agent = LLMAgent(MCPManager.get_instance().tools)
         prompt = _build_prompt(request)
 
-        await agent.stream_response(
-            prompt,
-            on_token=lambda content: emit(
-                json.dumps({"type": "token", "reply": content})
-            ),
-        )
-        emit(json.dumps({"type": "done", "reply": ""}))
+        try:
+            await agent.stream_response(
+                prompt,
+                on_token=lambda content: emit(
+                    json.dumps({"type": "token", "reply": content})
+                ),
+            )
+        except Exception:
+            logger.exception("Erro ao gerar resposta do chat")
+            emit(
+                json.dumps(
+                    {"type": "error", "reply": "Não foi possível gerar a resposta. Por favor, envie sua mensagem novamente."}
+                )
+            )
+            return
+        finally:
+            emit(json.dumps({"type": "done", "reply": ""}))

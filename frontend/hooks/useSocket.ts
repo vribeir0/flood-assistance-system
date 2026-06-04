@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { chatService } from "@/services/chatService";
 import { ChatPayload, Message } from "@/types/chat";
 import { Socket } from "socket.io-client";
 
 export type { ChatPayload };
+
+const STREAM_TIMEOUT_MS = 60_000;
 
 type UseSocketResult = {
   messages: Message[];
@@ -40,6 +42,27 @@ export function useSocket(): UseSocketResult {
   const [streamResponse, setStreamResponse] = useState("");
   const [sessionExpired, setSessionExpired] = useState(false);
   const socketRef = useRef<Socket | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetTimeout = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setIsStreaming(false);
+      setStreamResponse((current) => {
+        if (current.trim()) {
+          setMessages((prev) => [...prev, Message.fromSystem(current)]);
+        }
+        return "";
+      });
+    }, STREAM_TIMEOUT_MS);
+  }, []);
+
+  const clearStreamTimeout = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     socketRef.current = chatService.createWebSocket();
@@ -65,12 +88,12 @@ export function useSocket(): UseSocketResult {
           type: string;
           reply?: string;
         };
-        // Chunks de resposta
         if (response.type === "token") {
           setStreamResponse((prev) => prev + (response.reply ?? ""));
           setIsStreaming(true);
-          // Resposta completa
+          resetTimeout();
         } else if (response.type === "done") {
+          clearStreamTimeout();
           setIsStreaming(false);
           setStreamResponse((current) => {
             if (current.trim()) {
@@ -79,6 +102,7 @@ export function useSocket(): UseSocketResult {
             return "";
           });
         } else if (response.type === "error") {
+          clearStreamTimeout();
           setIsStreaming(false);
           setStreamResponse("");
           setMessages((prev) => [
@@ -87,6 +111,7 @@ export function useSocket(): UseSocketResult {
           ]);
         }
       } catch {
+        clearStreamTimeout();
         setMessages((prev) => [
           ...prev,
           Message.fromSystem("Erro ao processar resposta."),
@@ -97,15 +122,17 @@ export function useSocket(): UseSocketResult {
     });
 
     return () => {
+      clearStreamTimeout();
       socket.disconnect();
     };
-  }, []);
+  }, [resetTimeout, clearStreamTimeout]);
 
   const sendMessage = (payload: ChatPayload) => {
     if (!socketRef.current) return;
     setMessages((prev) => [...prev, Message.fromUser(payload.message)]);
     socketRef.current.emit("chat_message", payload);
     setIsStreaming(true);
+    resetTimeout();
   };
 
   return { messages, isStreaming, streamResponse, sessionExpired, sendMessage };
