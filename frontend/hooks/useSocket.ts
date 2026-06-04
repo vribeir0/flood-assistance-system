@@ -36,8 +36,15 @@ function parseResponse(data: unknown) {
   return data;
 }
 
+const WELCOME_MESSAGE =
+  "Olá! Sou seu assistente de emergência para situações de alagamento. " +
+  "Posso informar as condições climáticas da sua região, avaliar riscos e gerar rotas de evacuação. " +
+  "Como posso ajudar?";
+
 export function useSocket(): UseSocketResult {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    Message.fromSystem(WELCOME_MESSAGE),
+  ]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamResponse, setStreamResponse] = useState("");
   const [connectionLost, setConnectionLost] = useState(false);
@@ -73,13 +80,17 @@ export function useSocket(): UseSocketResult {
       if (error.message?.includes("rejected")) {
         socket.disconnect();
         clearSession();
-        setConnectionLost(true);
       }
+      setConnectionLost(true);
     });
 
     socket.on("reconnect_failed", () => {
       clearSession();
       setConnectionLost(true);
+    });
+
+    socket.on("connect", () => {
+      setConnectionLost(false);
     });
 
     socket.on("chat_response", (data) => {
