@@ -34,11 +34,6 @@ const responsiveBackground = `
 body {
   background-color: #fff;
 }
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #000;
-  }
-}
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -49,6 +44,7 @@ button, input {
 }
 html, body, #root {
   height: 100%;
+  height: 100dvh;
   margin: 0;
   overflow: hidden;
 }

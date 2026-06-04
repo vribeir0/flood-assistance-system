@@ -1,5 +1,5 @@
-import { View, StyleSheet } from "react-native";
-import { TextInput } from "react-native";
+import { useRef } from "react";
+import { View, StyleSheet, TextInput, Platform } from "react-native";
 
 type Props = {
   value: string;
@@ -9,13 +9,27 @@ type Props = {
 };
 
 export function ChatInput({ value, onChange, onSend, disabled }: Props) {
+  const inputRef = useRef<TextInput>(null);
+
+  const handleFocus = () => {
+    if (Platform.OS !== "web") return;
+    setTimeout(() => {
+      (inputRef.current as unknown as HTMLElement)?.scrollIntoView?.({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }, 300);
+  };
+
   return (
     <View style={styles.container}>
       <TextInput
+        ref={inputRef}
         style={styles.input}
         value={value}
         onChangeText={onChange}
         onSubmitEditing={onSend}
+        onFocus={handleFocus}
         editable={!disabled}
         returnKeyType="send"
         placeholder="Digite sua mensagem..."
