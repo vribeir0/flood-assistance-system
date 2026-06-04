@@ -70,8 +70,8 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f0f2f5",
-    height: "100vh" as any,
-    maxHeight: "100vh" as any,
+    height: "100dvh" as any,
+    maxHeight: "100dvh" as any,
     overflow: "hidden" as any,
   },
   chatWrapper: {
