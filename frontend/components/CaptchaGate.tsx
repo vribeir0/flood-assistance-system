@@ -1,7 +1,8 @@
 import { Text, View } from "@/components/Themed";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Platform, StyleSheet } from "react-native";
+import { ActivityIndicator, StyleSheet } from "react-native";
 import { API_URL } from "@/services/api";
+import { clearSession } from "@/helpers/session";
 
 const SITE_KEY = process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 const SESSION_KEY = "captcha_verified";
@@ -14,12 +15,6 @@ function isSessionValid(): boolean {
   const createdAt = localStorage.getItem(SESSION_CREATED_AT_KEY);
   if (!createdAt) return false;
   return Date.now() - Number(createdAt) < SESSION_TTL_MS;
-}
-
-function clearSession() {
-  localStorage.removeItem(SESSION_KEY);
-  localStorage.removeItem(SESSION_TOKEN_KEY);
-  localStorage.removeItem(SESSION_CREATED_AT_KEY);
 }
 
 export default function CaptchaGate({

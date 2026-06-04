@@ -1,21 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { chatService } from "@/services/chatService";
+import { clearSession } from "@/helpers/session";
 import { ChatPayload, Message } from "@/types/chat";
 import { Socket } from "socket.io-client";
 
 const STREAM_TIMEOUT_MS = 60_000;
-
-const SESSION_KEYS = [
-  "captcha_verified",
-  "captcha_session_token",
-  "captcha_session_created_at",
-];
-
-function clearSession() {
-  if (typeof localStorage !== "undefined") {
-    SESSION_KEYS.forEach((k) => localStorage.removeItem(k));
-  }
-}
 
 const WELCOME_MESSAGE =
   "Olá! Posso consultar o clima da sua região, avaliar o risco de alagamento " +
@@ -33,32 +22,30 @@ export function useSocket() {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPayloadRef = useRef<ChatPayload | null>(null);
 
-  const resetTimeout = useCallback(() => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      setIsStreaming(false);
-      setStreamResponse((current) => {
-        if (current.trim()) {
-          setMessages((prev) => [...prev, Message.fromSystem(current)]);
-        }
-        return "";
-      });
-    }, STREAM_TIMEOUT_MS);
-  }, []);
-
-  const clearStreamTimeout = useCallback(() => {
+  const finishStream = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    setIsStreaming(false);
+    setStreamResponse((current) => {
+      if (current.trim()) {
+        setMessages((prev) => [...prev, Message.fromSystem(current)]);
+      }
+      return "";
+    });
   }, []);
+
+  const resetTimeout = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(finishStream, STREAM_TIMEOUT_MS);
+  }, [finishStream]);
 
   useEffect(() => {
     socketRef.current = chatService.createWebSocket();
     const socket = socketRef.current;
 
     socket.on("connect_error", (error) => {
-      console.error("Erro de conexão:", error);
       if (error.message?.includes("rejected")) {
         socket.disconnect();
         clearSession();
@@ -87,16 +74,7 @@ export function useSocket() {
       }
     });
 
-    socket.on("disconnect", () => {
-      clearStreamTimeout();
-      setIsStreaming(false);
-      setStreamResponse((current) => {
-        if (current.trim()) {
-          setMessages((prev) => [...prev, Message.fromSystem(current)]);
-        }
-        return "";
-      });
-    });
+    socket.on("disconnect", finishStream);
 
     socket.on("chat_response", (data) => {
       try {
@@ -110,52 +88,40 @@ export function useSocket() {
           setIsStreaming(true);
           resetTimeout();
         } else if (response.type === "done") {
-          clearStreamTimeout();
-          setIsStreaming(false);
-          setStreamResponse((current) => {
-            if (current.trim()) {
-              setMessages((prev) => [...prev, Message.fromSystem(current)]);
-            }
-            return "";
-          });
+          finishStream();
         } else if (response.type === "error") {
-          clearStreamTimeout();
-          setIsStreaming(false);
-          setStreamResponse("");
+          finishStream();
           setMessages((prev) => [
             ...prev,
             Message.fromSystem(response.reply ?? "Ocorreu um erro inesperado."),
           ]);
         }
       } catch {
-        clearStreamTimeout();
+        finishStream();
         setMessages((prev) => [
           ...prev,
           Message.fromSystem("Não foi possível processar a resposta."),
         ]);
-        setIsStreaming(false);
-        setStreamResponse("");
       }
     });
 
     return () => {
-      clearStreamTimeout();
+      finishStream();
       socket.disconnect();
     };
-  }, [resetTimeout, clearStreamTimeout]);
+  }, [resetTimeout, finishStream]);
 
   const sendMessage = (payload: ChatPayload) => {
     if (!socketRef.current) return;
 
     setMessages((prev) => [...prev, Message.fromUser(payload.message)]);
+    pendingPayloadRef.current = payload;
 
     if (!socketRef.current.connected) {
-      pendingPayloadRef.current = payload;
       socketRef.current.connect();
       return;
     }
 
-    pendingPayloadRef.current = payload;
     socketRef.current.emit("chat_message", payload);
     setIsStreaming(true);
     resetTimeout();

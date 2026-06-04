@@ -1,18 +1,9 @@
 import { useState } from "react";
 import { LocationCoords, LocationStatus } from "@/types/location";
 
-export type { LocationCoords, LocationStatus };
-
-type UseLocationResult = {
-  location: LocationCoords | null;
-  locationStatus: LocationStatus;
-  setLocationStatus: (status: LocationStatus) => void;
-  fetchLocation: () => void;
-};
-
 export function useLocation(
   onResolved?: (coords: LocationCoords | null) => void
-): UseLocationResult {
+) {
   const [location, setLocation] = useState<LocationCoords | null>(null);
   const [locationStatus, setLocationStatus] = useState<LocationStatus>("idle");
 
