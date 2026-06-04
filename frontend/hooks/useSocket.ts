@@ -3,17 +3,7 @@ import { chatService } from "@/services/chatService";
 import { ChatPayload, Message } from "@/types/chat";
 import { Socket } from "socket.io-client";
 
-export type { ChatPayload };
-
 const STREAM_TIMEOUT_MS = 60_000;
-
-type UseSocketResult = {
-  messages: Message[];
-  isStreaming: boolean;
-  streamResponse: string;
-  connectionLost: boolean;
-  sendMessage: (payload: ChatPayload) => void;
-};
 
 const SESSION_KEYS = [
   "captcha_verified",
@@ -27,22 +17,13 @@ function clearSession() {
   }
 }
 
-function parseResponse(data: unknown) {
-  if (typeof data === "string") return JSON.parse(data);
-  if (typeof data === "object" && data !== null && "data" in data) {
-    const d = data as { data: unknown };
-    if (typeof d.data === "string") return JSON.parse(d.data);
-  }
-  return data;
-}
-
 const WELCOME_MESSAGE =
   "Olá! Posso consultar o clima da sua região, avaliar o risco de alagamento " +
   "e gerar uma rota de evacuação se for necessário. Como posso ajudar?\n\n" +
   "Se quiser testar o sistema em um cenário de emergência, ative o " +
   '"Modo Teste" no topo da tela.';
 
-export function useSocket(): UseSocketResult {
+export function useSocket() {
   const [messages, setMessages] = useState<Message[]>([
     Message.fromSystem(WELCOME_MESSAGE),
   ]);
@@ -117,7 +98,7 @@ export function useSocket(): UseSocketResult {
 
     socket.on("chat_response", (data) => {
       try {
-        const response = parseResponse(data) as {
+        const response = JSON.parse(data) as {
           type: string;
           reply?: string;
         };
