@@ -13,11 +13,26 @@ def _build_prompt(request: ChatRequest) -> dict:
     """Monta a lista de mensagens: system prompt primeiro, depois o histórico da conversa,
     e por último a nova mensagem do usuário.
     """
+    # Constrói informações de contexto para adicionar ao system prompt
+    context_lines = []
+    if request.test_mode:
+        context_lines.append(
+            "MODO TESTE ATIVO: O sistema está em modo de teste. O risco deve ser tratado como ALTO, independentemente das condições meteorológicas reais."
+        )
+
+    context_section = ""
+    if context_lines:
+        context_section = "\n\n---\n\n# Contexto do Usuário\n\n" + "\n".join(
+            context_lines
+        )
+
+    system_prompt_with_context = SYSTEM_PROMPT + context_section
+
     return {
         "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt_with_context},
             *[{"role": msg.role, "content": msg.content} for msg in request.history],
-            {"role": "user", "content": request.to_user_context().to_json()},
+            {"role": "user", "content": request.message},
         ]
     }
 
@@ -43,7 +58,10 @@ class GenerateChatResponse:
             logger.exception("Erro ao gerar resposta do chat")
             emit(
                 json.dumps(
-                    {"type": "error", "reply": "Não consegui gerar a resposta. Tente enviar sua mensagem de novo."}
+                    {
+                        "type": "error",
+                        "reply": "Não consegui gerar a resposta. Tente enviar sua mensagem de novo.",
+                    }
                 )
             )
             return
