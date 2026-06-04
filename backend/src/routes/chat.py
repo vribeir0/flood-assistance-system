@@ -20,7 +20,7 @@ SESSION_TOKEN_TTL = 3600  # segundos
 # SIDs autenticados nesta instância do servidor
 _authenticated_sids: set[str] = set()
 
-RATE_LIMIT_MAX = 15  # máximo de mensagens
+RATE_LIMIT_MAX = 20  # máximo de mensagens
 RATE_LIMIT_WINDOW = 60  # janela em segundos
 _message_timestamps: dict[str, list[float]] = defaultdict(list)
 

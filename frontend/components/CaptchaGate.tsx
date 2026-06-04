@@ -6,6 +6,21 @@ import { API_URL } from "@/services/api";
 const SITE_KEY = process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 const SESSION_KEY = "captcha_verified";
 const SESSION_TOKEN_KEY = "captcha_session_token";
+const SESSION_CREATED_AT_KEY = "captcha_session_created_at";
+const SESSION_TTL_MS = 60 * 60 * 1000; // 1 hora
+
+function isSessionValid(): boolean {
+  if (typeof localStorage === "undefined") return false;
+  const createdAt = localStorage.getItem(SESSION_CREATED_AT_KEY);
+  if (!createdAt) return false;
+  return Date.now() - Number(createdAt) < SESSION_TTL_MS;
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(SESSION_TOKEN_KEY);
+  localStorage.removeItem(SESSION_CREATED_AT_KEY);
+}
 
 export default function CaptchaGate({
   children,
@@ -35,8 +50,9 @@ export default function CaptchaGate({
               });
               if (!res.ok) throw new Error("Verificação falhou");
               const { session_token } = await res.json();
-              sessionStorage.setItem(SESSION_TOKEN_KEY, session_token);
-              sessionStorage.setItem(SESSION_KEY, "true");
+              localStorage.setItem(SESSION_TOKEN_KEY, session_token);
+              localStorage.setItem(SESSION_KEY, "true");
+              localStorage.setItem(SESSION_CREATED_AT_KEY, String(Date.now()));
               setVerified(true);
             } catch {
               // Exibe erro ao usuário em vez de resetar silenciosamente em loop
@@ -67,15 +83,15 @@ export default function CaptchaGate({
     setMounted(true);
 
     if (
-      sessionStorage.getItem(SESSION_KEY) === "true" &&
-      sessionStorage.getItem(SESSION_TOKEN_KEY)
+      localStorage.getItem(SESSION_KEY) === "true" &&
+      localStorage.getItem(SESSION_TOKEN_KEY) &&
+      isSessionValid()
     ) {
       setVerified(true);
       return;
     }
 
-    sessionStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(SESSION_TOKEN_KEY);
+    clearSession();
     setReady(true);
   }, []);
 

@@ -18,8 +18,8 @@ export const chatService = {
 
   createWebSocket: (): Socket => {
     const token =
-      typeof sessionStorage !== "undefined"
-        ? sessionStorage.getItem(SESSION_TOKEN_KEY) ?? undefined
+      typeof localStorage !== "undefined"
+        ? localStorage.getItem(SESSION_TOKEN_KEY) ?? undefined
         : undefined;
     return createSocket(token);
   },
