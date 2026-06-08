@@ -1,10 +1,6 @@
 import { Text, View } from "@/components/Themed";
 import { useRouter } from "expo-router";
-import {
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -14,7 +10,7 @@ export default function HomeScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>
-            Sistema de Assistência contra Enchentes
+            Sistema de Assistência em caso de Enchentes
           </Text>
           <Text style={styles.subtitle}>
             Orientação em eventos hidrometeorológicos extremos
@@ -25,7 +21,7 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>Sobre o Sistema</Text>
           <Text style={styles.description}>
             Um chatbot que orienta pessoas em áreas de risco durante enchentes
-            e alagamentos, com dados meteorológicos e rotas de evacuação.
+            ou alagamentos, com dados meteorológicos e rotas de evacuação.
           </Text>
 
           <View style={styles.featuresContainer}>
@@ -78,12 +74,8 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Trabalho de Conclusão de Curso
-          </Text>
-          <Text style={styles.footerText}>
-            Vinicius Santos Ribeiro — UTFPR
-          </Text>
+          <Text style={styles.footerText}>Trabalho de Conclusão de Curso</Text>
+          <Text style={styles.footerText}>Vinicius Santos Ribeiro — UTFPR</Text>
         </View>
       </ScrollView>
     </View>
