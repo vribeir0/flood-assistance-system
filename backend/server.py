@@ -1,6 +1,7 @@
 import logging
 
 import requests
+from haversine import haversine, Unit
 from mcp.server.fastmcp import FastMCP
 
 from settings import (
@@ -14,6 +15,98 @@ from settings import (
 logger = logging.getLogger(__name__)
 
 mcp = FastMCP("Geo")
+
+SAFE_LOCATIONS = [
+    {
+        "name": "Rua da Cidadania Bairro Novo",
+        "latitude": -25.5449,
+        "longitude": -49.2659,
+    },
+    {
+        "name": "Rua da Cidadania Boqueirão (Carmo)",
+        "latitude": -25.5015,
+        "longitude": -49.2386,
+    },
+    {
+        "name": "Rua da Cidadania Cajuru",
+        "latitude": -25.4550,
+        "longitude": -49.2178,
+    },
+    {
+        "name": "Rua da Cidadania Pinheirinho",
+        "latitude": -25.5138,
+        "longitude": -49.2954,
+    },
+    {
+        "name": "Rua da Cidadania Tatuquara",
+        "latitude": -25.5658,
+        "longitude": -49.3374,
+    },
+    {
+        "name": "Rua da Cidadania Matriz (Praça Rui Barbosa)",
+        "latitude": -25.4357,
+        "longitude": -49.2743,
+    },
+    {
+        "name": "Rua da Cidadania Boa Vista",
+        "latitude": -25.3878,
+        "longitude": -49.2319,
+    },
+    {
+        "name": "Rua da Cidadania Santa Felicidade",
+        "latitude": -25.4013,
+        "longitude": -49.3275,
+    },
+    {
+        "name": "Rua da Cidadania Portão (Fazendinha)",
+        "latitude": -25.4756,
+        "longitude": -49.3190,
+    },
+    {
+        "name": "Rua da Cidadania CIC",
+        "latitude": -25.4988,
+        "longitude": -49.3524,
+    },
+]
+
+
+@mcp.tool()
+async def find_nearest_safe_location(lat: float, lon: float) -> dict:
+    """Encontra o local seguro mais próximo do usuário usando o algoritmo de Haversine.
+
+    Use esta ferramenta ANTES de calcular a rota de evacuação, para determinar qual
+    local seguro está mais próximo das coordenadas do usuário. O resultado deve ser
+    usado como destino (final_waypoint) na ferramenta get_directions_with_steps.
+
+    Args:
+        lat (float): Latitude da localização atual do usuário.
+        lon (float): Longitude da localização atual do usuário.
+
+    Returns:
+        dict: Informações do local seguro mais próximo contendo:
+            - name (str): Nome do local seguro.
+            - latitude (float): Latitude do local seguro.
+            - longitude (float): Longitude do local seguro.
+            - distance_km (float): Distância em quilômetros até o local seguro.
+    """
+    user_point = (lat, lon)
+    nearest = None
+    min_distance = float("inf")
+
+    for location in SAFE_LOCATIONS:
+        location_point = (location["latitude"], location["longitude"])
+        distance = haversine(user_point, location_point, unit=Unit.KILOMETERS)
+
+        if distance < min_distance:
+            min_distance = distance
+            nearest = location
+
+    return {
+        "name": nearest["name"],
+        "latitude": nearest["latitude"],
+        "longitude": nearest["longitude"],
+        "distance_km": round(min_distance, 2),
+    }
 
 
 @mcp.tool()
