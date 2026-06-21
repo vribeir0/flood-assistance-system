@@ -59,16 +59,26 @@ class MCPManager:
         logger.info("Conexão MCP pronta — tools: %s", [t.name for t in self._tools])
 
     async def _keep_alive(self) -> None:
-        """Abre a conexão stdio, carrega as ferramentas, sinaliza que está pronto e então
-        fica parado em um asyncio.Event para manter a conexão ativa durante toda a vida do processo.
+        """Abre a conexão stdio, carrega as ferramentas e sinaliza que está pronto.
+        Se a conexão cair, tenta reconectar automaticamente a cada 2 segundos.
         """
-        async with stdio_client(server_params) as (read, write):
-            async with ClientSession(read, write) as session:
-                await session.initialize()
-                self._tools = await load_mcp_tools(session)
-                self._ready.set()
-
-                await asyncio.Event().wait()
+        first_connect = True
+        while True:
+            try:
+                async with stdio_client(server_params) as (read, write):
+                    async with ClientSession(read, write) as session:
+                        await session.initialize()
+                        self._tools = await load_mcp_tools(session)
+                        if first_connect:
+                            self._ready.set()
+                            first_connect = False
+                        await asyncio.Event().wait()
+            except Exception:
+                logger.warning(
+                    "Conexão MCP perdida. Tentando reconectar em 2s...",
+                    exc_info=True,
+                )
+                await asyncio.sleep(2)
 
     @property
     def tools(self):

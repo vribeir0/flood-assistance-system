@@ -1,6 +1,7 @@
 import logging
 from collections.abc import Callable
 
+from langchain_core.messages import AIMessageChunk
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import create_react_agent
 
@@ -28,11 +29,23 @@ class LLMAgent:
         ou emitir os tokens conforme chegam.
         """
         try:
-            async for event in self._agent.astream_events(prompt):
-                if event["event"] == "on_chat_model_stream":
-                    content = event["data"]["chunk"].content
-                    if content:
-                        on_token(content)
+            async for msg, _metadata in self._agent.astream(
+                prompt, stream_mode="messages"
+            ):
+                if not isinstance(msg, AIMessageChunk):
+                    logger.debug(
+                        "Chunk ignorado — tipo inesperado: %s", type(msg).__name__
+                    )
+                    continue
+                if not isinstance(msg.content, str):
+                    logger.debug(
+                        "Chunk ignorado — content não é str: %s (valor: %r)",
+                        type(msg.content).__name__,
+                        msg.content,
+                    )
+                    continue
+                if msg.content:
+                    on_token(msg.content)
         except Exception:
             logger.exception("Erro durante streaming do agente")
             raise
