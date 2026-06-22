@@ -13,7 +13,7 @@ class UserContext(BaseModel):
     modo_teste: bool = False
 
     def to_json(self) -> str:
-        return self.model_dump_json()
+        return self.model_dump_json(exclude_none=True, exclude={"modo_teste"} if not self.modo_teste else set())
 
 
 class ChatRequest(BaseModel):

@@ -16,7 +16,8 @@ class LLMAgent:
         model = ChatGoogleGenerativeAI(
             google_api_key=GEMINI_API_KEY,
             model=GEMINI_MODEL,
-            temperature=0,
+            temperature=1,
+            thinking_level="low",
         )
         self._agent = create_react_agent(model, tools)
 
@@ -32,25 +33,16 @@ class LLMAgent:
             async for msg, _metadata in self._agent.astream(
                 prompt, stream_mode="messages"
             ):
-                logger.debug("Chunk recebido: type=%s content_type=%s", type(msg).__name__, type(getattr(msg, "content", None)).__name__)
+                logger.debug(
+                    "Chunk recebido: type=%s content_type=%s",
+                    type(msg).__name__,
+                    type(getattr(msg, "content", None)).__name__,
+                )
                 if not isinstance(msg, AIMessageChunk):
                     continue
                 content = msg.content
-                if isinstance(content, str):
-                    if content:
-                        on_token(content)
-                elif isinstance(content, list):
-                    for block in content:
-                        if isinstance(block, dict) and block.get("type") == "text":
-                            text = block.get("text", "")
-                            if text:
-                                on_token(text)
-                else:
-                    logger.warning(
-                        "Chunk ignorado — content tipo inesperado: %s (valor: %r)",
-                        type(content).__name__,
-                        content,
-                    )
+                if isinstance(content, str) and content:
+                    on_token(content)
         except Exception:
             logger.exception("Erro durante streaming do agente")
             raise

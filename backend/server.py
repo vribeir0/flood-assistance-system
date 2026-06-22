@@ -157,7 +157,7 @@ async def geocode_address(address: str) -> dict:
 
 
 @mcp.tool()
-async def get_weather(lat: float, lon: float) -> str:
+async def get_weather(lat: float, lon: float) -> dict:
     """Get weather for location."""
 
     url = WEATHER_API_URL
