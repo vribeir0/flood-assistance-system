@@ -33,16 +33,14 @@ class LLMAgent:
             async for msg, _metadata in self._agent.astream(
                 prompt, stream_mode="messages"
             ):
-                logger.debug(
-                    "Chunk recebido: type=%s content_type=%s",
-                    type(msg).__name__,
-                    type(getattr(msg, "content", None)).__name__,
-                )
                 if not isinstance(msg, AIMessageChunk):
                     continue
-                content = msg.content
-                if isinstance(content, str) and content:
-                    on_token(content)
+
+                for block in msg.content:
+                    if isinstance(block, dict) and block.get("type") == "text":
+                        text = block.get("text", "")
+                        if text:
+                            on_token(text)
         except Exception:
             logger.exception("Erro durante streaming do agente")
             raise
