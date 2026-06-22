@@ -1,6 +1,8 @@
-import { Text, View } from "@/components/Themed";
+import { Text, View } from "react-native";
 import { StyleSheet } from "react-native";
 import { LocationStatus } from "@/types/location";
+import Colors from "@/constants/Colors";
+import { Icon } from "./Icon";
 
 type Props = {
   locationStatus: LocationStatus;
@@ -23,24 +25,44 @@ export function LocationModal({ locationStatus, onAllow, onSkip }: Props) {
       ? "Tentar novamente"
       : "Permitir localização";
 
+  const isLoading = locationStatus === "loading";
+
   return (
     <View style={styles.overlay}>
       <View style={styles.card}>
+        <View style={styles.iconWrap}>
+          <Icon name="map-pin" size={24} color={Colors.brand} />
+        </View>
         <Text style={styles.title}>Localização necessária</Text>
         <Text style={styles.body}>{bodyText}</Text>
         <button
           onClick={onAllow}
-          disabled={locationStatus === "loading"}
+          disabled={isLoading}
           style={{
             ...primaryButton,
-            cursor: locationStatus === "loading" ? "default" : "pointer",
-            backgroundColor:
-              locationStatus === "loading" ? "#90CAF9" : "#1976D2",
+            cursor: isLoading ? "default" : "pointer",
+            backgroundColor: isLoading ? Colors.sage300 : Colors.brand,
+            borderColor: isLoading ? Colors.sage300 : Colors.brand,
+          }}
+          onMouseEnter={(e) => {
+            if (!isLoading) e.currentTarget.style.filter = "brightness(0.94)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.filter = "none";
           }}
         >
           {allowLabel}
         </button>
-        <button onClick={onSkip} style={secondaryButton}>
+        <button
+          onClick={onSkip}
+          style={secondaryButton}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = Colors.borderStrong;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = Colors.borderSoft;
+          }}
+        >
           Continuar sem localização
         </button>
       </View>
@@ -49,35 +71,37 @@ export function LocationModal({ locationStatus, onAllow, onSkip }: Props) {
 }
 
 const primaryButton: React.CSSProperties = {
-  border: "none",
-  borderRadius: 24,
+  border: `1px solid ${Colors.brand}`,
+  borderRadius: 999,
   paddingTop: 12,
   paddingBottom: 12,
   paddingLeft: 32,
   paddingRight: 32,
-  color: "white",
-  fontWeight: "bold",
+  color: Colors.white,
+  fontWeight: 600,
   fontSize: 15,
-  fontFamily: "inherit",
+  fontFamily: '"Plus Jakarta Sans", sans-serif',
   lineHeight: "inherit",
   width: "100%",
+  transition: "filter 130ms cubic-bezier(0.22,0.61,0.36,1)",
 };
 
 const secondaryButton: React.CSSProperties = {
   cursor: "pointer",
   backgroundColor: "transparent",
-  border: "1px solid #9E9E9E",
-  borderRadius: 24,
+  border: `1px solid ${Colors.borderSoft}`,
+  borderRadius: 999,
   paddingTop: 10,
   paddingBottom: 10,
   paddingLeft: 32,
   paddingRight: 32,
-  color: "#757575",
-  fontWeight: "500",
+  color: Colors.textMuted,
+  fontWeight: 500,
   fontSize: 14,
-  fontFamily: "inherit",
+  fontFamily: '"Plus Jakarta Sans", sans-serif',
   lineHeight: "inherit",
   width: "100%",
+  transition: "border-color 130ms cubic-bezier(0.22,0.61,0.36,1)",
 };
 
 const styles = StyleSheet.create({
@@ -87,30 +111,43 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.55)",
+    backgroundColor: "rgba(45,58,34,0.45)" as any,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 10,
   },
   card: {
-    backgroundColor: "white",
+    backgroundColor: Colors.surfaceCard,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.borderSoft,
     padding: 32,
     width: "85%",
     maxWidth: 420,
     alignItems: "center",
     gap: 16,
+    boxShadow: "0 16px 40px rgba(45,58,34,0.16)" as any,
+  },
+  iconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 999,
+    backgroundColor: Colors.sage100,
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#1976D2",
+    fontWeight: "700",
+    color: Colors.textStrong,
     textAlign: "center",
+    fontFamily: "Poppins",
   },
   body: {
     fontSize: 14,
-    color: "#555",
+    color: Colors.textBody,
     textAlign: "center",
     lineHeight: 21,
+    fontFamily: "Plus Jakarta Sans",
   },
 });

@@ -6,16 +6,8 @@ import { Socket } from "socket.io-client";
 
 const STREAM_TIMEOUT_MS = 60_000;
 
-const WELCOME_MESSAGE =
-  "Olá! Posso consultar o clima da sua região, avaliar o risco de alagamento " +
-  "e gerar uma rota de evacuação se for necessário. Como posso ajudar?\n\n" +
-  "Se quiser testar o sistema em um cenário de emergência, ative o " +
-  '"Modo Teste" no topo da tela.';
-
 export function useSocket() {
-  const [messages, setMessages] = useState<Message[]>([
-    Message.fromSystem(WELCOME_MESSAGE),
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamResponse, setStreamResponse] = useState("");
   const socketRef = useRef<Socket | null>(null);

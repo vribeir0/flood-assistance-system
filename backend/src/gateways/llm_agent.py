@@ -33,11 +33,6 @@ class LLMAgent:
             async for msg, _metadata in self._agent.astream(
                 prompt, stream_mode="messages"
             ):
-                logger.debug(
-                    "Chunk recebido: type=%s content_type=%s",
-                    type(msg).__name__,
-                    type(getattr(msg, "content", None)).__name__,
-                )
                 if not isinstance(msg, AIMessageChunk):
                     continue
                 content = msg.content
