@@ -32,20 +32,25 @@ class LLMAgent:
             async for msg, _metadata in self._agent.astream(
                 prompt, stream_mode="messages"
             ):
+                logger.debug("Chunk recebido: type=%s content_type=%s", type(msg).__name__, type(getattr(msg, "content", None)).__name__)
                 if not isinstance(msg, AIMessageChunk):
-                    logger.debug(
-                        "Chunk ignorado — tipo inesperado: %s", type(msg).__name__
-                    )
                     continue
-                if not isinstance(msg.content, str):
-                    logger.debug(
-                        "Chunk ignorado — content não é str: %s (valor: %r)",
-                        type(msg.content).__name__,
-                        msg.content,
+                content = msg.content
+                if isinstance(content, str):
+                    if content:
+                        on_token(content)
+                elif isinstance(content, list):
+                    for block in content:
+                        if isinstance(block, dict) and block.get("type") == "text":
+                            text = block.get("text", "")
+                            if text:
+                                on_token(text)
+                else:
+                    logger.warning(
+                        "Chunk ignorado — content tipo inesperado: %s (valor: %r)",
+                        type(content).__name__,
+                        content,
                     )
-                    continue
-                if msg.content:
-                    on_token(msg.content)
         except Exception:
             logger.exception("Erro durante streaming do agente")
             raise

@@ -85,7 +85,4 @@ class MCPManager:
         return self._tools
 
     def submit(self, coro):
-        """Agenda uma coroutine no event loop do MCP a partir de qualquer thread.
-        Retorna um Future.
-        """
         return asyncio.run_coroutine_threadsafe(coro, self._loop)
