@@ -1,8 +1,9 @@
-import { Text, View } from "@/components/Themed";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, StyleSheet } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { API_URL } from "@/services/api";
 import { clearSession } from "@/helpers/session";
+import Colors from "@/constants/Colors";
+import { Logo } from "@/components/chat/Logo";
 
 const SITE_KEY = process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 const SESSION_KEY = "captcha_verified";
@@ -26,7 +27,7 @@ export default function CaptchaGate({
   const [ready, setReady] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [verifyError, setVerifyError] = useState(false);
-  const containerRef = useRef<View>(null);
+  const containerRef = useRef<any>(null);
 
   const startCaptcha = () => {
     setVerifyError(false);
@@ -50,7 +51,6 @@ export default function CaptchaGate({
               localStorage.setItem(SESSION_CREATED_AT_KEY, String(Date.now()));
               setVerified(true);
             } catch {
-              // Exibe erro ao usuário em vez de resetar silenciosamente em loop
               setVerifyError(true);
               (window as any).turnstile?.reset();
             }
@@ -108,7 +108,6 @@ export default function CaptchaGate({
     setReady(true);
   }, []);
 
-  // Só inicia o Turnstile após o container estar no DOM.
   useEffect(() => {
     if (ready && !verified) {
       startCaptcha();
@@ -121,7 +120,7 @@ export default function CaptchaGate({
   if (!ready) {
     return (
       <View style={styles.overlay}>
-        <ActivityIndicator size="large" color="#1976D2" />
+        <ActivityIndicator size="large" color={Colors.brand} />
       </View>
     );
   }
@@ -129,13 +128,14 @@ export default function CaptchaGate({
   return (
     <View style={styles.overlay}>
       <View style={styles.card}>
-        <Text style={styles.title}>Verificação de Segurança</Text>
+        <Logo tone="dark" size="md" showWordmark={false} />
+        <Text style={styles.title}>Um momento...</Text>
         <Text style={styles.subtitle}>
-          Complete a verificação abaixo para continuar
+          Só precisamos confirmar que você é uma pessoa real.
         </Text>
         {verifyError && (
           <Text style={styles.errorText}>
-            Falha ao verificar. Tente novamente.
+            A verificação falhou. Recarregue a página para tentar de novo.
           </Text>
         )}
         <View
@@ -151,32 +151,37 @@ export default function CaptchaGate({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: Colors.surfaceApp,
     alignItems: "center",
     justifyContent: "center",
   },
   card: {
-    backgroundColor: "white",
-    borderRadius: 12,
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.borderSoft,
     padding: 40,
     alignItems: "center",
     width: "90%",
     maxWidth: 420,
-    // @ts-ignore — shadow funciona em web
-    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+    gap: 12,
+    boxShadow: "0 6px 18px rgba(67,83,52,0.10)" as any,
   },
   title: {
     fontSize: 22,
-    fontWeight: "bold",
-    color: "#1976D2",
-    marginBottom: 8,
+    fontWeight: "700",
+    color: Colors.textStrong,
     textAlign: "center",
+    fontFamily: "Poppins",
+    marginTop: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: "#666",
+    color: Colors.textMuted,
     textAlign: "center",
-    marginBottom: 24,
+    lineHeight: 20,
+    fontFamily: "Plus Jakarta Sans",
+    marginBottom: 8,
   },
   widget: {
     minHeight: 65,
@@ -184,8 +189,15 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 13,
-    color: "#d32f2f",
+    color: Colors.riskDanger,
+    backgroundColor: Colors.riskDangerBg,
+    borderWidth: 1,
+    borderColor: Colors.riskDangerBorder,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     textAlign: "center",
-    marginBottom: 12,
+    fontFamily: "Plus Jakarta Sans",
+    overflow: "hidden" as any,
   },
 });

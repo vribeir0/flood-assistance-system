@@ -50,6 +50,9 @@ button, input {
   font-family: inherit;
   font-size: inherit;
 }
+@media (max-width: 520px) {
+  .hide-mobile { display: none !important; }
+}
 html, body, #root {
   height: 100%;
   height: 100dvh;

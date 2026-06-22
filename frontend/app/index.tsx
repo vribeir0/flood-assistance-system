@@ -40,6 +40,38 @@ const SUGGESTIONS: { icon: IconName; title: string; subtitle: string; seed: stri
   },
 ];
 
+function Switch({ on }: { on: boolean }) {
+  const trackColor = on ? Colors.riskDanger : Colors.gold400;
+  return (
+    <span
+      style={{
+        width: 40,
+        height: 23,
+        borderRadius: 99,
+        background: trackColor,
+        position: "relative",
+        transition: "background 220ms",
+        flexShrink: 0,
+        display: "inline-block",
+      }}
+    >
+      <span
+        style={{
+          position: "absolute",
+          top: 2.5,
+          left: on ? 19 : 2.5,
+          width: 18,
+          height: 18,
+          borderRadius: "50%",
+          background: "#fff",
+          transition: "left 220ms cubic-bezier(0.22,0.61,0.36,1)",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.25)",
+        }}
+      />
+    </span>
+  );
+}
+
 export default function ChatScreen() {
   const [message, setMessage] = useState("");
   const [testMode, setTestMode] = useState(false);
@@ -126,9 +158,10 @@ export default function ChatScreen() {
     danger: { bg: Colors.riskDangerBg, border: Colors.riskDangerBorder, fg: Colors.riskDanger },
   };
 
-  function pillStyle(tone: string, isOnDark: boolean): React.CSSProperties {
+  function locationPillStyle(): React.CSSProperties {
+    const tone = locationTone;
     const t = TONES[tone] || TONES.neutral;
-    const onDark = isOnDark && tone === "neutral";
+    const onDark = tone === "neutral";
     return {
       display: "inline-flex",
       alignItems: "center",
@@ -142,7 +175,7 @@ export default function ChatScreen() {
       background: onDark ? "rgba(255,255,255,0.10)" : t.bg,
       border: `1px solid ${onDark ? "rgba(255,255,255,0.18)" : t.border}`,
       borderRadius: 999,
-      cursor: "pointer",
+      cursor: locationStatus === "loading" ? "default" : "pointer",
       whiteSpace: "nowrap",
       transition: "filter 130ms cubic-bezier(0.22,0.61,0.36,1)",
     };
@@ -163,23 +196,39 @@ export default function ChatScreen() {
           borderBottom: "1px solid rgba(0,0,0,0.12)",
         }}
       >
-        <Logo tone="light" size="sm" />
+        <Logo tone="light" size="sm" wordmarkClassName="hide-mobile" />
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* Modo Teste toggle */}
           <button
             onClick={() => setTestMode((prev) => !prev)}
-            style={pillStyle(testMode ? "danger" : "neutral", true)}
+            aria-pressed={testMode}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 9,
+              padding: "5px 7px 5px 14px",
+              borderRadius: 999,
+              cursor: "pointer",
+              border: `1px solid ${testMode ? Colors.riskDangerBorder : "rgba(255,255,255,0.18)"}`,
+              background: testMode ? Colors.riskDangerBg : "rgba(255,255,255,0.10)",
+              color: testMode ? Colors.riskDanger : Colors.white,
+              fontFamily: '"Plus Jakarta Sans", sans-serif',
+              fontWeight: 600,
+              fontSize: 13,
+              whiteSpace: "nowrap",
+              transition: "filter 130ms cubic-bezier(0.22,0.61,0.36,1)",
+            }}
             onMouseEnter={(e) => { e.currentTarget.style.filter = "brightness(0.96)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.filter = "none"; }}
           >
-            {testMode ? "⚠ Modo Teste" : "Modo Teste"}
+            Modo Teste
+            <Switch on={testMode} />
           </button>
+          {/* Location pill */}
           <button
             onClick={fetchLocation}
             disabled={locationStatus === "loading"}
-            style={{
-              ...pillStyle(locationTone, true),
-              cursor: locationStatus === "loading" ? "default" : "pointer",
-            }}
+            style={locationPillStyle()}
             onMouseEnter={(e) => { e.currentTarget.style.filter = "brightness(0.96)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.filter = "none"; }}
           >
@@ -188,27 +237,31 @@ export default function ChatScreen() {
         </div>
       </header>
 
-      {/* ── Test mode banner ── */}
+      {/* ── Test mode active banner ── */}
       {testMode && (
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: 8,
+            gap: 9,
             width: "100%",
             boxSizing: "border-box",
-            padding: "8px 16px",
-            backgroundColor: Colors.riskDangerBg,
-            borderBottom: `1px solid ${Colors.riskDangerBorder}`,
-            color: Colors.riskDanger,
+            padding: "10px 16px",
+            backgroundColor: Colors.riskWatchBg,
+            borderBottom: `1px solid ${Colors.riskWatchBorder}`,
+            color: Colors.riskWatch,
             fontSize: 13,
             fontWeight: 600,
+            lineHeight: 1.35,
             fontFamily: '"Plus Jakarta Sans", sans-serif',
           }}
         >
-          Modo de teste ativo. O risco será tratado como alto, independente do
-          clima real.
+          <Icon name="alert-triangle" size={16} color={Colors.riskWatch} />
+          <span>
+            Modo teste ligado — as respostas simulam um cenário de risco ALTO,
+            mesmo sem chuva real.
+          </span>
         </div>
       )}
 
@@ -235,6 +288,38 @@ export default function ChatScreen() {
               Orientação em tempo real durante enchentes e alagamentos.
               Descreva sua situação ou escolha um ponto de partida.
             </Text>
+
+            {/* ── Test mode hint banner ── */}
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "flex-start",
+                gap: 8,
+                marginTop: 2,
+                padding: "10px 14px",
+                background: Colors.riskWatchBg,
+                border: `1px solid ${Colors.riskWatchBorder}`,
+                borderRadius: 10,
+                textAlign: "left",
+                maxWidth: 480,
+              }}
+            >
+              <span style={{ color: Colors.riskWatch, flexShrink: 0, marginTop: 1 }}>
+                <Icon name="alert-triangle" size={15} color={Colors.riskWatch} />
+              </span>
+              <span
+                style={{
+                  fontFamily: '"Plus Jakarta Sans", sans-serif',
+                  fontSize: 12.5,
+                  lineHeight: 1.45,
+                  color: Colors.riskWatch,
+                }}
+              >
+                Só quer testar? Ligue o <strong>Modo Teste</strong> no topo para
+                simular uma emergência, sem depender da chuva real.
+              </span>
+            </div>
+
             <div
               style={{
                 display: "grid",
@@ -242,6 +327,7 @@ export default function ChatScreen() {
                 gap: 14,
                 width: "100%",
                 maxWidth: 680,
+                marginTop: 4,
               }}
             >
               {SUGGESTIONS.map((s, i) => (

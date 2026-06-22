@@ -1,5 +1,5 @@
 /**
- * Logo — AVA droplet mark in a rounded olive tile with optional wordmark.
+ * Logo — droplet mark in a rounded olive tile with optional wordmark.
  * Use tone="light" on dark surfaces (header), tone="dark" on cream surfaces.
  */
 
@@ -9,6 +9,7 @@ type Props = {
   tone?: "light" | "dark";
   size?: "sm" | "md" | "lg";
   showWordmark?: boolean;
+  wordmarkClassName?: string;
 };
 
 const SIZES = {
@@ -17,7 +18,7 @@ const SIZES = {
   lg: { mark: 52, word: 28, sub: 12 },
 };
 
-export function Logo({ tone = "light", size = "md", showWordmark = true }: Props) {
+export function Logo({ tone = "light", size = "md", showWordmark = true, wordmarkClassName }: Props) {
   const s = SIZES[size];
   const wordColor = tone === "light" ? Colors.white : Colors.olive700;
   const subColor = tone === "light" ? Colors.sage300 : Colors.sage400;
@@ -35,17 +36,17 @@ export function Logo({ tone = "light", size = "md", showWordmark = true }: Props
         dangerouslySetInnerHTML={{ __html: svg }}
       />
       {showWordmark && (
-        <span style={{ display: "flex", flexDirection: "column", gap: 2, lineHeight: 1 }}>
+        <span className={wordmarkClassName} style={{ display: "flex", flexDirection: "column", gap: 2, lineHeight: 1 }}>
           <span
             style={{
               fontFamily: '"Poppins", sans-serif',
               fontWeight: 700,
               fontSize: s.word,
-              letterSpacing: "0.06em",
+              letterSpacing: "-0.01em",
               color: wordColor,
             }}
           >
-            AVA
+            Chatbot
           </span>
           <span
             style={{

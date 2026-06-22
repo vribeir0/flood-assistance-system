@@ -19,7 +19,7 @@ export const unstable_settings = {
 
 SplashScreen.preventAutoHideAsync();
 
-const AvaTheme = {
+const AppTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
@@ -57,7 +57,7 @@ export default function RootLayout() {
 function RootLayoutNav() {
   return (
     <CaptchaGate>
-      <ThemeProvider value={AvaTheme}>
+      <ThemeProvider value={AppTheme}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="modal" options={{ presentation: "modal" }} />

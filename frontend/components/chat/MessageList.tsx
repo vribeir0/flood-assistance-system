@@ -141,7 +141,7 @@ function TypingDots() {
       <span style={{ ...dotStyle, animationDelay: "320ms" }} />
       <style
         dangerouslySetInnerHTML={{
-          __html: `@keyframes ava-bounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-4px);opacity:1}}`,
+          __html: `@keyframes dot-bounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-4px);opacity:1}}`,
         }}
       />
     </div>
@@ -154,7 +154,7 @@ const dotStyle: React.CSSProperties = {
   borderRadius: "50%",
   background: Colors.sage300,
   display: "inline-block",
-  animation: "ava-bounce 1s infinite ease-in-out",
+  animation: "dot-bounce 1s infinite ease-in-out",
 };
 
 const markdownStyles = {
