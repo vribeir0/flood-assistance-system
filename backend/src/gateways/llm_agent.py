@@ -35,9 +35,12 @@ class LLMAgent:
             ):
                 if not isinstance(msg, AIMessageChunk):
                     continue
-                content = msg.content
-                if isinstance(content, str) and content:
-                    on_token(content)
+
+                for block in msg.content:
+                    if isinstance(block, dict) and block.get("type") == "text":
+                        text = block.get("text", "")
+                        if text:
+                            on_token(text)
         except Exception:
             logger.exception("Erro durante streaming do agente")
             raise
