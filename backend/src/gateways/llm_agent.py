@@ -24,11 +24,7 @@ class LLMAgent:
     async def stream_response(
         self, prompt: dict, on_token: Callable[[str], None]
     ) -> None:
-        """Executa o agente e chama on_token para cada trecho de conteúdo que retorna.
-
-        Não devolve a resposta completa — quem chama é responsável por montar
-        ou emitir os tokens conforme chegam.
-        """
+        """Executa o agente e chama on_token para cada bloco de retorno da LLM."""
         try:
             async for msg, _metadata in self._agent.astream(
                 prompt, stream_mode="messages"

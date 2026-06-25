@@ -323,7 +323,7 @@ export default function ChatScreen() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(200px, 1fr))",
+                gridTemplateColumns: "repeat(2, 1fr)",
                 gap: 14,
                 width: "100%",
                 maxWidth: 680,
