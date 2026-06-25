@@ -13,7 +13,12 @@ import { ChatPayload, Message } from "@/types/chat";
 import { LocationCoords } from "@/types/location";
 import Colors from "@/constants/Colors";
 
-const SUGGESTIONS: { icon: IconName; title: string; subtitle: string; seed: string }[] = [
+const SUGGESTIONS: {
+  icon: IconName;
+  title: string;
+  subtitle: string;
+  seed: string;
+}[] = [
   {
     icon: "cloud-rain",
     title: "Está chovendo muito aqui",
@@ -142,20 +147,37 @@ export default function ChatScreen() {
 
   const isEmpty = messages.length === 0 && !isStreaming;
 
-  const locationTone = {
-    granted: "safe",
-    loading: "watch",
-    denied: "danger",
-    error: "danger",
-    idle: "neutral",
-    skipped: "neutral",
-  }[locationStatus] || "neutral";
+  const locationTone =
+    {
+      granted: "safe",
+      loading: "watch",
+      denied: "danger",
+      error: "danger",
+      idle: "neutral",
+      skipped: "neutral",
+    }[locationStatus] || "neutral";
 
   const TONES: Record<string, { bg: string; border: string; fg: string }> = {
-    neutral: { bg: Colors.sage100, border: Colors.sage200, fg: Colors.olive700 },
-    safe: { bg: Colors.riskSafeBg, border: Colors.riskSafeBorder, fg: Colors.riskSafe },
-    watch: { bg: Colors.riskWatchBg, border: Colors.riskWatchBorder, fg: Colors.riskWatch },
-    danger: { bg: Colors.riskDangerBg, border: Colors.riskDangerBorder, fg: Colors.riskDanger },
+    neutral: {
+      bg: Colors.sage100,
+      border: Colors.sage200,
+      fg: Colors.olive700,
+    },
+    safe: {
+      bg: Colors.riskSafeBg,
+      border: Colors.riskSafeBorder,
+      fg: Colors.riskSafe,
+    },
+    watch: {
+      bg: Colors.riskWatchBg,
+      border: Colors.riskWatchBorder,
+      fg: Colors.riskWatch,
+    },
+    danger: {
+      bg: Colors.riskDangerBg,
+      border: Colors.riskDangerBorder,
+      fg: Colors.riskDanger,
+    },
   };
 
   function locationPillStyle(): React.CSSProperties {
@@ -209,8 +231,12 @@ export default function ChatScreen() {
               padding: "5px 7px 5px 14px",
               borderRadius: 999,
               cursor: "pointer",
-              border: `1px solid ${testMode ? Colors.riskDangerBorder : "rgba(255,255,255,0.18)"}`,
-              background: testMode ? Colors.riskDangerBg : "rgba(255,255,255,0.10)",
+              border: `1px solid ${
+                testMode ? Colors.riskDangerBorder : "rgba(255,255,255,0.18)"
+              }`,
+              background: testMode
+                ? Colors.riskDangerBg
+                : "rgba(255,255,255,0.10)",
               color: testMode ? Colors.riskDanger : Colors.white,
               fontFamily: '"Plus Jakarta Sans", sans-serif',
               fontWeight: 600,
@@ -218,8 +244,12 @@ export default function ChatScreen() {
               whiteSpace: "nowrap",
               transition: "filter 130ms cubic-bezier(0.22,0.61,0.36,1)",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.filter = "brightness(0.96)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.filter = "none"; }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.filter = "brightness(0.96)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.filter = "none";
+            }}
           >
             Modo Teste
             <Switch on={testMode} />
@@ -229,8 +259,12 @@ export default function ChatScreen() {
             onClick={fetchLocation}
             disabled={locationStatus === "loading"}
             style={locationPillStyle()}
-            onMouseEnter={(e) => { e.currentTarget.style.filter = "brightness(0.96)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.filter = "none"; }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.filter = "brightness(0.96)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.filter = "none";
+            }}
           >
             {locationLabel}
           </button>
@@ -285,8 +319,8 @@ export default function ChatScreen() {
             <Logo tone="dark" showWordmark={false} size="lg" />
             <Text style={styles.headline}>Como posso te ajudar agora?</Text>
             <Text style={styles.subtitle}>
-              Orientação em tempo real durante enchentes e alagamentos.
-              Descreva sua situação ou escolha um ponto de partida.
+              Orientação em tempo real durante enchentes e alagamentos. Descreva
+              sua situação ou escolha um ponto de partida.
             </Text>
 
             {/* ── Test mode hint banner ── */}
@@ -304,8 +338,14 @@ export default function ChatScreen() {
                 maxWidth: 480,
               }}
             >
-              <span style={{ color: Colors.riskWatch, flexShrink: 0, marginTop: 1 }}>
-                <Icon name="alert-triangle" size={15} color={Colors.riskWatch} />
+              <span
+                style={{ color: Colors.riskWatch, flexShrink: 0, marginTop: 1 }}
+              >
+                <Icon
+                  name="alert-triangle"
+                  size={15}
+                  color={Colors.riskWatch}
+                />
               </span>
               <span
                 style={{
@@ -340,10 +380,6 @@ export default function ChatScreen() {
                 />
               ))}
             </div>
-            <Text style={styles.hint}>
-              O sistema pode usar sua localização para consultar o clima e
-              calcular rotas de evacuação.
-            </Text>
           </View>
         </ScrollView>
       ) : (
@@ -406,12 +442,5 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: "center",
     maxWidth: 560,
-  },
-  hint: {
-    fontFamily: "Plus Jakarta Sans",
-    fontSize: 12,
-    color: Colors.textSubtle,
-    textAlign: "center",
-    marginTop: 4,
   },
 });
