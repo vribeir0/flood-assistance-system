@@ -19,53 +19,53 @@ mcp = FastMCP("Geo")
 SAFE_LOCATIONS = [
     {
         "name": "Rua da Cidadania Bairro Novo",
-        "latitude": -25.5449,
-        "longitude": -49.2659,
+        "latitude": -25.545231964580502,
+        "longitude": -49.26572367523785,
     },
     {
         "name": "Rua da Cidadania Boqueirão (Carmo)",
-        "latitude": -25.5015,
-        "longitude": -49.2386,
+        "latitude": -25.50159726619081,
+        "longitude": -49.238630426171895,
     },
     {
         "name": "Rua da Cidadania Cajuru",
-        "latitude": -25.4550,
-        "longitude": -49.2178,
+        "latitude": -25.441311151100418,
+        "longitude": -49.220375249786635,
     },
     {
         "name": "Rua da Cidadania Pinheirinho",
-        "latitude": -25.5138,
-        "longitude": -49.2954,
+        "latitude": -25.513878592464057,
+        "longitude": -49.29499444189569,
     },
     {
         "name": "Rua da Cidadania Tatuquara",
-        "latitude": -25.5658,
-        "longitude": -49.3374,
+        "latitude": -25.575302551262688,
+        "longitude": -49.33137913485804,
     },
     {
         "name": "Rua da Cidadania Matriz (Praça Rui Barbosa)",
-        "latitude": -25.4357,
-        "longitude": -49.2743,
+        "latitude": -25.435385839478144,
+        "longitude": -49.27227453026741,
     },
     {
         "name": "Rua da Cidadania Boa Vista",
-        "latitude": -25.3878,
-        "longitude": -49.2319,
+        "latitude": -25.38486749341574,
+        "longitude": -49.232252381549785,
     },
     {
         "name": "Rua da Cidadania Santa Felicidade",
-        "latitude": -25.4013,
-        "longitude": -49.3275,
+        "latitude": -25.4004242321501,
+        "longitude": -49.33016995335974,
     },
     {
         "name": "Rua da Cidadania Portão (Fazendinha)",
-        "latitude": -25.4756,
-        "longitude": -49.3190,
+        "latitude": -25.47795887297317,
+        "longitude": -49.32652805495283,
     },
     {
         "name": "Rua da Cidadania CIC",
-        "latitude": -25.4988,
-        "longitude": -49.3524,
+        "latitude": -25.504681532326245,
+        "longitude": -49.323731264340736,
     },
 ]
 
